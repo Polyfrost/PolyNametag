@@ -1,0 +1,15 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.7",
+  "package": "org.polyfrost.polynametag.mixin",
+  "refmap": "mixins.polynametag.refmap.json",
+  "injectors": {
+    "maxShiftBy": 5
+  },
+  "client": [
+    "RenderAccessor",
+    "RendererLivingEntityMixin",
+    "RenderMixin"
+  ],
+  "verbose": true
+}
