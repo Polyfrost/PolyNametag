@@ -71,7 +71,7 @@ fun renderSneaking(renderer: Render<*>, entity: EntityLivingBase, x: Double, y: 
     drawBackground(fontRenderer.getStringWidth(displayName))
     GlStateManager.enableTexture2D()
     GlStateManager.depthMask(true)
-    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 553648127)
+    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 0x20FFFFFF)
     GlStateManager.enableLighting()
     GlStateManager.disableBlend()
     GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -91,16 +91,16 @@ fun renderNormal(renderer: Render<*>, entity: Entity, x: Double, y: Double, z: D
     GlStateManager.scale(-SCALE_VALUE, -SCALE_VALUE, SCALE_VALUE)
     GlStateManager.disableLighting()
     GlStateManager.depthMask(false)
-    GlStateManager.disableDepth() // added
+    GlStateManager.disableDepth() // difference
     GlStateManager.enableBlend()
     GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
     GlStateManager.disableTexture2D()
-    drawBackground(fontRenderer.getStringWidth(displayName)) // no depth in vanilla
+    drawBackground(fontRenderer.getStringWidth(displayName)) // no depth as same in vanilla
     GlStateManager.enableTexture2D()
-    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 553648127)
-    GlStateManager.enableDepth() // added
+    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 0x20FFFFFF) // transparent in blocks
+    GlStateManager.enableDepth() // difference
     GlStateManager.depthMask(true)
-    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, -1)
+    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 0xFFFFFFFF.toInt())
     GlStateManager.enableLighting()
     GlStateManager.disableBlend()
     GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -108,15 +108,17 @@ fun renderNormal(renderer: Render<*>, entity: Entity, x: Double, y: Double, z: D
 }
 
 fun drawBackground(textWidth: Int) {
+    GlStateManager.color(0.0f, 0.0f, 0.0f, 0.25f)
+
     val halfWidth = textWidth / 2.0 + 1.0
     val tessellator = Tessellator.getInstance()
 
     with(tessellator.worldRenderer) {
-        begin(7, DefaultVertexFormats.POSITION_COLOR)
-        pos(-halfWidth, -1.0, 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
-        pos(-halfWidth, 8.0, 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
-        pos(halfWidth, 8.0, 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
-        pos(halfWidth, -1.0, 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
+        begin(7, DefaultVertexFormats.POSITION)
+        pos(-halfWidth, -1.0, 0.0).endVertex()
+        pos(-halfWidth, 8.0, 0.0).endVertex()
+        pos(halfWidth, 8.0, 0.0).endVertex()
+        pos(halfWidth, -1.0, 0.0).endVertex()
     }
 
     tessellator.draw()
