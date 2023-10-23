@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class RendererLivingEntityMixin {
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At("HEAD"))
     private void polyNametag$renderName(EntityLivingBase entity, double x, double y, double z, CallbackInfo callbackInfo) {
-        HooksKt.callback((RenderAccessor) this, entity, x, y, z, callbackInfo);
+        HooksKt.callback(this, entity, x, y, z, callbackInfo);
     }
 }
