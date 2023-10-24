@@ -1,21 +1,15 @@
 package org.polyfrost.polynametag.config
 
 import cc.polyfrost.oneconfig.config.Config
-import cc.polyfrost.oneconfig.config.annotations.*
+import cc.polyfrost.oneconfig.config.annotations.Color
+import cc.polyfrost.oneconfig.config.annotations.Slider
+import cc.polyfrost.oneconfig.config.annotations.Switch
 import cc.polyfrost.oneconfig.config.core.OneColor
-import cc.polyfrost.oneconfig.config.data.InfoType
 import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
 import org.polyfrost.polynametag.PolyNametag
 
 object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL), "${PolyNametag.MODID}.json") {
-
-    @Info(
-        text = "Some features may have conflict with Patcher",
-        type = InfoType.WARNING,
-        size = 2
-    )
-    private var warning = false
 
     @Slider(name = "Height offset", min = -0.5f, max = 0.5f)
     var heightOffset = 0f
@@ -26,14 +20,14 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL), "${PolyNameta
     @Switch(name = "Text shadow")
     var textShadow = false
 
-    @Switch(name = "Show self nametag")
-    var showSelfNametag = true
+    @Switch(name = "Show own nametag")
+    var showOwnNametag = true
 
     @Switch(name = "Background")
     var background = true
 
     @Color(name = "Background color")
-    var backgroundColor = OneColor(0f, 0f, 0f, 0.25f)
+    var backgroundColor = OneColor(0, 0, 0, 63)
 
     init {
         initialize()

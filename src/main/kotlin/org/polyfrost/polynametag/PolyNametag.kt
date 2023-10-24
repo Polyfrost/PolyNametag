@@ -11,7 +11,7 @@ object PolyNametag {
     const val VERSION = "@VER@"
 
     @Mod.EventHandler
-    fun onInit(e: FMLInitializationEvent) {
+    fun onInit(event: FMLInitializationEvent) {
         ModConfig
     }
 }

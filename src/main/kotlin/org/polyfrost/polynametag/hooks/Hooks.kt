@@ -1,125 +1,106 @@
 package org.polyfrost.polynametag.hooks
 
+import cc.polyfrost.oneconfig.utils.dsl.mc
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.entity.Render
-import net.minecraft.client.renderer.entity.RendererLivingEntity
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityLivingBase
 import org.lwjgl.opengl.GL11
 import org.polyfrost.polynametag.config.ModConfig
-import org.polyfrost.polynametag.mixin.RenderAccessor
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
+import kotlin.math.max
 
-fun nametagTransformation() {
-    GlStateManager.translate(0f, ModConfig.heightOffset, 0f)
-    GlStateManager.scale(ModConfig.scale, ModConfig.scale, ModConfig.scale)
-}
 
-private const val SCALE_VALUE = 0.02666667f
-private const val NAME_TAG_RANGE = 64.0
-private const val NAME_TAG_RANGE_SNEAK = 32.0
+private const val NAMETAG_SCALE = 0.02666667f
 
-fun callback(renderer: Any, entity: Entity, x: Double, y: Double, z: Double, callbackInfo: CallbackInfo) {
+fun overrideNametag(renderer: Any, entity: Entity, displayName: String, x: Double, y: Double, z: Double, range: Int, callbackInfo: CallbackInfo) {
     if (!ModConfig.enabled) return
+    if (renderer !is Render<*>) return
 
+    if (!entity.isWithinRange(renderer.renderManager.livingPlayer, range)) return
+
+    renderNametag(renderer, entity, displayName, x, y, z)
     callbackInfo.cancel()
 }
 
-private val Entity.scaledHeight get() = if (this is EntityLivingBase && isChild) height * 0.5f else height
+private fun Entity.isWithinRange(entity: Entity, range: Int) = getDistanceSqToEntity(entity) < range * range
 
-fun renderNametag(renderer: RendererLivingEntity<*>, entity: EntityLivingBase, x: Double, y: Double, z: Double) {
-    if (!canRenderName(renderer, entity)) return
+private fun renderNametag(renderer: Render<*>, entity: Entity, displayName: String, x: Double, y: Double, z: Double) {
+    val fontRenderer = renderer.fontRendererFromRenderManager
+    val textHalfWidth = fontRenderer.getStringWidth(displayName) / 2f
+    val sneaking = entity.isSneaking
+    var yAboveHead = y + entity.height + 0.5 + ModConfig.heightOffset
+    if (sneaking) yAboveHead -= 0.25
+    val scale = NAMETAG_SCALE * ModConfig.scale
+    val checkPerspective = if (mc.gameSettings.thirdPersonView == 2) -1 else 1
+    GL11.glNormal3f(0f, 1f, 0f)
+    GlStateManager.pushMatrix()
+    GlStateManager.translate(x, yAboveHead, z)
+    GlStateManager.rotate(-renderer.renderManager.playerViewY, 0f, 1f, 0f)
+    GlStateManager.rotate(renderer.renderManager.playerViewX * checkPerspective, 1f, 0f, 0f)
+    GlStateManager.scale(-scale, -scale, scale)
+    GlStateManager.disableLighting()
 
-    val displayName: String = entity.displayName.formattedText
-
-    var y2 = y + entity.scaledHeight + 0.5
-
-    GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1f)
-
-    if (entity.isSneaking) {
-        renderSneaking(renderer, entity, x, y, z, displayName)
-    } else {
-        renderNormal(renderer, entity, x, y, z, displayName)
+    if (!sneaking) {
+        GlStateManager.disableDepth()
     }
-}
 
-fun canRenderName(renderer: Render<*>, entity: Entity) =
-    (renderer as RenderAccessor).invokeCanRenderName(entity) && entity.isWithinDistance(
-        entity = renderer.renderManager.livingPlayer,
-        distance = if (entity.isSneaking) NAME_TAG_RANGE_SNEAK else NAME_TAG_RANGE
-    )
-
-fun Entity.isWithinDistance(entity: Entity, distance: Double) = getDistanceSqToEntity(entity) < distance * distance
-
-fun renderSneaking(renderer: Render<*>, entity: EntityLivingBase, x: Double, y: Double, z: Double, displayName: String) {
-    val fontRenderer: FontRenderer = renderer.fontRendererFromRenderManager
-    GlStateManager.pushMatrix()
-    GlStateManager.translate(x, y + entity.scaledHeight + 0.5, z)
-    GlStateManager.translate(0.0, -0.25, 0.0)
-    GL11.glNormal3f(0.0f, 1.0f, 0.0f)
-    GlStateManager.rotate(-renderer.renderManager.playerViewY, 0.0f, 1.0f, 0.0f)
-    GlStateManager.rotate(renderer.renderManager.playerViewX, 1.0f, 0.0f, 0.0f)
-    GlStateManager.scale(-SCALE_VALUE, -SCALE_VALUE, SCALE_VALUE)
-    GlStateManager.disableLighting()
-    GlStateManager.depthMask(false)
     GlStateManager.enableBlend()
     GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
-    GlStateManager.disableTexture2D()
-    drawBackground(fontRenderer.getStringWidth(displayName))
-    GlStateManager.enableTexture2D()
-    GlStateManager.depthMask(true)
-    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 0x20FFFFFF)
+    drawBackground(textHalfWidth)
+    fontRenderer.drawStringWithoutZFighting(displayName, -textHalfWidth, 0f, 0x20FFFFFF)
+
+    if (!sneaking) {
+        GlStateManager.enableDepth()
+        fontRenderer.drawStringWithoutZFighting(displayName, -textHalfWidth, 0f, 0xFFFFFFFF.toInt())
+    }
+
     GlStateManager.enableLighting()
     GlStateManager.disableBlend()
-    GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
+    GlStateManager.color(1f, 1f, 1f, 1f)
     GlStateManager.popMatrix()
 }
 
-fun renderNormal(renderer: Render<*>, entity: Entity, x: Double, y: Double, z: Double, displayName: String) {
-    val distance: Double = entity.getDistanceSqToEntity(renderer.renderManager.livingPlayer)
-    if (distance > 64 * 64) return // redundant check
+private fun drawBackground(textHalfWidth: Float) {
+    if (!ModConfig.background) return
 
-    val fontRenderer: FontRenderer = renderer.fontRendererFromRenderManager
-    GlStateManager.pushMatrix()
-    GlStateManager.translate(x, y + entity.scaledHeight + 0.5, z)
-    GL11.glNormal3f(0.0f, 1.0f, 0.0f)
-    GlStateManager.rotate(-renderer.renderManager.playerViewY, 0.0f, 1.0f, 0.0f)
-    GlStateManager.rotate(renderer.renderManager.playerViewX, 1.0f, 0.0f, 0.0f)
-    GlStateManager.scale(-SCALE_VALUE, -SCALE_VALUE, SCALE_VALUE)
-    GlStateManager.disableLighting()
-    GlStateManager.depthMask(false)
-    GlStateManager.disableDepth() // difference
-    GlStateManager.enableBlend()
-    GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
     GlStateManager.disableTexture2D()
-    drawBackground(fontRenderer.getStringWidth(displayName)) // no depth as same in vanilla
-    GlStateManager.enableTexture2D()
-    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 0x20FFFFFF) // transparent in blocks
-    GlStateManager.enableDepth() // difference
-    GlStateManager.depthMask(true)
-    fontRenderer.drawString(displayName, -fontRenderer.getStringWidth(displayName) / 2, 0, 0xFFFFFFFF.toInt())
-    GlStateManager.enableLighting()
-    GlStateManager.disableBlend()
-    GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
-    GlStateManager.popMatrix()
-}
 
-fun drawBackground(textWidth: Int) {
-    GlStateManager.color(0.0f, 0.0f, 0.0f, 0.25f)
+    with(ModConfig.backgroundColor) {
+        GlStateManager.color(red / 255f, green / 255f, blue / 255f, alpha / 255f)
+    }
 
-    val halfWidth = textWidth / 2.0 + 1.0
+    val halfWidth = textHalfWidth + 1.0
     val tessellator = Tessellator.getInstance()
 
     with(tessellator.worldRenderer) {
         begin(7, DefaultVertexFormats.POSITION)
-        pos(-halfWidth, -1.0, 0.0).endVertex()
-        pos(-halfWidth, 8.0, 0.0).endVertex()
-        pos(halfWidth, 8.0, 0.0).endVertex()
-        pos(halfWidth, -1.0, 0.0).endVertex()
+        pos(-halfWidth, -1.0, 0.01).endVertex()
+        pos(-halfWidth, 8.0, 0.01).endVertex()
+        pos(halfWidth, 8.0, 0.01).endVertex()
+        pos(halfWidth, -1.0, 0.01).endVertex()
     }
 
     tessellator.draw()
+
+    GlStateManager.enableTexture2D()
+}
+
+private fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
+    if (!ModConfig.textShadow) return drawString(text, x, y, color, false)
+    GlStateManager.pushMatrix()
+    val shadowX = drawString(text, x + 1f, y + 1f, shadowColor(color), false)
+    GlStateManager.translate(0f, 0f, -0.01f)
+    val normalX = drawString(text, x, y, color, false)
+    GlStateManager.popMatrix()
+    return max(shadowX, normalX)
+}
+
+private fun shadowColor(color: Int): Int {
+    val shiftedAlpha = color and 0xFF000000.toInt()
+    val rgbCapped = color and 0xFCFCFC
+    val quarterRGB = rgbCapped shr 2
+    return quarterRGB or shiftedAlpha
 }

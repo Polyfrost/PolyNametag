@@ -9,9 +9,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Render.class)
-public class RenderMixin {
-    @Inject(method = "renderName(Lnet/minecraft/entity/Entity;DDD)V", at = @At("HEAD"))
-    private void polyNametag$renderName(Entity entity, double x, double y, double z, CallbackInfo callbackInfo) {
-        HooksKt.callback(this, entity, x, y, z, callbackInfo);
+public abstract class RenderMixin {
+    @Inject(method = "renderLivingLabel", at = @At("HEAD"), cancellable = true)
+    private void polyNametag$overrideNametag(Entity entity, String displayName, double x, double y, double z, int range, CallbackInfo callbackInfo) {
+        HooksKt.overrideNametag(this, entity, displayName, x, y, z, range, callbackInfo);
     }
 }
