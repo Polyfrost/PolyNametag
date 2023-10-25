@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="src/main/resources/polynametag.svg" />
+</p>
+
 # PolyNametag
 a nametag modication mod
 
