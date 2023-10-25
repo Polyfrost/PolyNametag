@@ -9,7 +9,7 @@ import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
 import org.polyfrost.polynametag.PolyNametag
 
-object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL), "${PolyNametag.MODID}.json") {
+object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.svg"), "${PolyNametag.MODID}.json") {
 
     @Slider(name = "Height offset", min = -0.5f, max = 0.5f)
     var heightOffset = 0f
