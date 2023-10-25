@@ -1,11 +1,11 @@
-<p align="center">
-  <img src="src/main/resources/polynametag.svg" />
-</p>
+<img align="right" src="src/main/resources/polynametag.svg"/>
 
 # PolyNametag
+
 a nametag modication mod
 
 ## Features
+
 - Height offset
 - Scale
 - Text shadow
@@ -14,4 +14,5 @@ a nametag modication mod
 - Background Color
 
 ## Settings Page 
+
 ![settings-page.png](screenshots/settings-page.png)
