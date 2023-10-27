@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
 import org.lwjgl.opengl.GL11
 import org.polyfrost.polynametag.config.ModConfig
+import org.polyfrost.polynametag.mixin.FontRendererAccessor
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import kotlin.math.max
 
@@ -35,6 +36,7 @@ private fun renderNametag(renderer: Render<*>, entity: Entity, displayName: Stri
     if (sneaking) yAboveHead -= 0.25
     val scale = NAMETAG_SCALE * ModConfig.scale
     val checkPerspective = if (mc.gameSettings.thirdPersonView == 2) -1 else 1
+
     GL11.glNormal3f(0f, 1f, 0f)
     GlStateManager.pushMatrix()
     GlStateManager.translate(x, yAboveHead, z)
@@ -89,18 +91,17 @@ private fun drawBackground(textHalfWidth: Float) {
 }
 
 private fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
+    if (this !is FontRendererAccessor) return -1 // smart cast
     if (!ModConfig.textShadow) return drawString(text, x, y, color, false)
+
+    GlStateManager.enableAlpha()
+    invokeResetStyles()
+
     GlStateManager.pushMatrix()
-    val shadowX = drawString(text, x + 1f, y + 1f, shadowColor(color), false)
+    val shadowX = invokeRenderString(text, x + 1f, y + 1f, color, true)
     GlStateManager.translate(0f, 0f, -0.01f)
     val normalX = drawString(text, x, y, color, false)
     GlStateManager.popMatrix()
-    return max(shadowX, normalX)
-}
 
-private fun shadowColor(color: Int): Int {
-    val shiftedAlpha = color and 0xFF000000.toInt()
-    val rgbCapped = color and 0xFCFCFC
-    val quarterRGB = rgbCapped shr 2
-    return quarterRGB or shiftedAlpha
+    return max(shadowX, normalX)
 }
