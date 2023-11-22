@@ -14,9 +14,6 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.
     @Slider(name = "Height offset", min = -0.5f, max = 0.5f)
     var heightOffset = 0f
 
-    @Slider(name = "Scale", min = 0.5f, max = 2f)
-    var scale = 1f
-
     @Switch(name = "Text shadow")
     var textShadow = false
 

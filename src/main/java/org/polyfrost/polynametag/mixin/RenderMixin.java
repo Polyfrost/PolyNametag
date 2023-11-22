@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Render.class)
+@Mixin(value = Render.class, priority = 1001)
 public abstract class RenderMixin {
     @Inject(method = "renderLivingLabel", at = @At("HEAD"), cancellable = true)
     private void polyNametag$overrideNametag(Entity entity, String displayName, double x, double y, double z, int range, CallbackInfo callbackInfo) {

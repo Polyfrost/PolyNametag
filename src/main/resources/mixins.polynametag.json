@@ -9,7 +9,8 @@
   "client": [
     "FontRendererAccessor",
     "RendererLivingEntityMixin",
-    "RenderMixin"
+    "RenderMixin",
+    "levelhead.AboveHeadRenderMixin"
   ],
   "verbose": true
 }

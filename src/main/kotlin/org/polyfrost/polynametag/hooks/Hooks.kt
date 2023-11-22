@@ -34,7 +34,7 @@ private fun renderNametag(renderer: Render<*>, entity: Entity, displayName: Stri
     val sneaking = entity.isSneaking
     var yAboveHead = y + entity.height + 0.5 + ModConfig.heightOffset
     if (sneaking) yAboveHead -= 0.25
-    val scale = NAMETAG_SCALE * ModConfig.scale
+    val scale = NAMETAG_SCALE
     val checkPerspective = if (mc.gameSettings.thirdPersonView == 2) -1 else 1
 
     GL11.glNormal3f(0f, 1f, 0f)
@@ -90,7 +90,7 @@ private fun drawBackground(textHalfWidth: Float) {
     GlStateManager.enableTexture2D()
 }
 
-private fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
+internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
     if (this !is FontRendererAccessor) return -1 // smart cast
     if (!ModConfig.textShadow) return drawString(text, x, y, color, false)
 
