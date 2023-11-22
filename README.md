@@ -2,16 +2,17 @@
 
 # PolyNametag
 
-a nametag modication mod
+A nametag modification mod
 
 ## Features
 
 - Height offset
-- Scale
 - Text shadow
 - Show own nametag
 - Background
 - Background Color
+
+![nametag-showcase.png](screenshots/nametag-showcase.png)
 
 ## Settings Page 
 
