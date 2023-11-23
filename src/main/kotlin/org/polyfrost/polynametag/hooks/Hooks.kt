@@ -1,6 +1,7 @@
 package org.polyfrost.polynametag.hooks
 
 import cc.polyfrost.oneconfig.utils.dsl.mc
+import club.sk1er.patcher.config.PatcherConfig
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
@@ -8,6 +9,7 @@ import net.minecraft.client.renderer.entity.Render
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
 import org.lwjgl.opengl.GL11
+import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
@@ -34,7 +36,7 @@ private fun renderNametag(renderer: Render<*>, entity: Entity, displayName: Stri
     val sneaking = entity.isSneaking
     var yAboveHead = y + entity.height + 0.5 + ModConfig.heightOffset
     if (sneaking) yAboveHead -= 0.25
-    val scale = NAMETAG_SCALE
+    val scale = NAMETAG_SCALE * ModConfig.scale.coerceAtLeast(0f).coerceAtMost(1f)
     val checkPerspective = if (mc.gameSettings.thirdPersonView == 2) -1 else 1
 
     GL11.glNormal3f(0f, 1f, 0f)
@@ -65,8 +67,10 @@ private fun renderNametag(renderer: Render<*>, entity: Entity, displayName: Stri
     GlStateManager.popMatrix()
 }
 
+internal fun shouldDrawBackground() = ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
+
 private fun drawBackground(textHalfWidth: Float) {
-    if (!ModConfig.background) return
+    if (!shouldDrawBackground()) return
 
     GlStateManager.disableTexture2D()
 

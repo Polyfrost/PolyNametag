@@ -10,7 +10,8 @@
     "FontRendererAccessor",
     "RendererLivingEntityMixin",
     "RenderMixin",
-    "levelhead.AboveHeadRenderMixin"
+    "levelhead.AboveHeadRenderMixin",
+    "levelhead.AboveHeadRenderMixin_ModifyArgs"
   ],
   "verbose": true
 }
