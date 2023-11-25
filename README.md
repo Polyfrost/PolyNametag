@@ -2,6 +2,9 @@
 
 # PolyNametag
 
+![Compact Powered by OneConfig](https://polyfrost.org/img/compact_vector.svg)
+
+
 A nametag modification mod
 
 ## Features
