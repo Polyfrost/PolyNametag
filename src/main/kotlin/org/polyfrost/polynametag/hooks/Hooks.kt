@@ -3,7 +3,6 @@ package org.polyfrost.polynametag.hooks
 import cc.polyfrost.oneconfig.utils.dsl.mc
 import club.sk1er.patcher.config.PatcherConfig
 import net.minecraft.client.gui.FontRenderer
-import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.entity.Render
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
@@ -14,6 +13,7 @@ import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import kotlin.math.max
+import net.minecraft.client.renderer.GlStateManager as GL
 
 
 private const val NAMETAG_SCALE = 0.02666667f
@@ -40,42 +40,43 @@ private fun renderNametag(renderer: Render<*>, entity: Entity, displayName: Stri
     val checkPerspective = if (mc.gameSettings.thirdPersonView == 2) -1 else 1
 
     GL11.glNormal3f(0f, 1f, 0f)
-    GlStateManager.pushMatrix()
-    GlStateManager.translate(x, yAboveHead, z)
-    GlStateManager.rotate(-renderer.renderManager.playerViewY, 0f, 1f, 0f)
-    GlStateManager.rotate(renderer.renderManager.playerViewX * checkPerspective, 1f, 0f, 0f)
-    GlStateManager.scale(-scale, -scale, scale)
-    GlStateManager.disableLighting()
+    GL.pushMatrix()
+    GL.translate(x, yAboveHead, z)
+    GL.rotate(-renderer.renderManager.playerViewY, 0f, 1f, 0f)
+    GL.rotate(renderer.renderManager.playerViewX * checkPerspective, 1f, 0f, 0f)
+    GL.scale(-scale, -scale, scale)
+    GL.disableLighting()
 
     if (!sneaking) {
-        GlStateManager.disableDepth()
+        GL.disableDepth()
     }
 
-    GlStateManager.enableBlend()
-    GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
-    drawBackground(textHalfWidth)
+    GL.enableBlend()
+    GL.tryBlendFuncSeparate(770, 771, 1, 0)
+    drawBackground(textHalfWidth, maxAlpha = 0x20)
     fontRenderer.drawStringWithoutZFighting(displayName, -textHalfWidth, 0f, 0x20FFFFFF)
 
     if (!sneaking) {
-        GlStateManager.enableDepth()
+        GL.enableDepth()
+        drawBackground(textHalfWidth)
         fontRenderer.drawStringWithoutZFighting(displayName, -textHalfWidth, 0f, 0xFFFFFFFF.toInt())
     }
 
-    GlStateManager.enableLighting()
-    GlStateManager.disableBlend()
-    GlStateManager.color(1f, 1f, 1f, 1f)
-    GlStateManager.popMatrix()
+    GL.enableLighting()
+    GL.disableBlend()
+    GL.color(1f, 1f, 1f, 1f)
+    GL.popMatrix()
 }
 
 internal fun shouldDrawBackground() = ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
 
-private fun drawBackground(textHalfWidth: Float) {
+private fun drawBackground(textHalfWidth: Float, maxAlpha: Int = 255) {
     if (!shouldDrawBackground()) return
 
-    GlStateManager.disableTexture2D()
+    GL.disableTexture2D()
 
     with(ModConfig.backgroundColor) {
-        GlStateManager.color(red / 255f, green / 255f, blue / 255f, alpha / 255f)
+        GL.color(red / 255f, green / 255f, blue / 255f, alpha.coerceAtMost(maxAlpha) / 255f)
     }
 
     val halfWidth = textHalfWidth + 1.0
@@ -91,21 +92,21 @@ private fun drawBackground(textHalfWidth: Float) {
 
     tessellator.draw()
 
-    GlStateManager.enableTexture2D()
+    GL.enableTexture2D()
 }
 
 internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
-    if (this !is FontRendererAccessor) return -1 // smart cast
+    if (this !is FontRendererAccessor) return -1
     if (!ModConfig.textShadow) return drawString(text, x, y, color, false)
 
-    GlStateManager.enableAlpha()
+    GL.enableAlpha()
     invokeResetStyles()
 
-    GlStateManager.pushMatrix()
+    GL.pushMatrix()
     val shadowX = invokeRenderString(text, x + 1f, y + 1f, color, true)
-    GlStateManager.translate(0f, 0f, -0.01f)
+    GL.translate(0f, 0f, -0.01f)
     val normalX = drawString(text, x, y, color, false)
-    GlStateManager.popMatrix()
+    GL.popMatrix()
 
     return max(shadowX, normalX)
 }

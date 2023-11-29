@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.*;
  */
 @Pseudo
 @Mixin(targets = "club.sk1er.mods.levelhead.render.AboveHeadRender", priority = 1001)
-public class AboveHeadRenderMixin {
+public abstract class AboveHeadRenderMixin {
 
     @Dynamic("LevelHead")
     @Redirect(method = "render(Lnet/minecraftforge/client/event/RenderLivingEvent$Specials$Post;)V", at = @At(value = "INVOKE", target = "Lclub/sk1er/mods/levelhead/render/AboveHeadRender;isSelf(Lnet/minecraft/entity/player/EntityPlayer;)Z", ordinal = 1), remap = false)
