@@ -2,7 +2,7 @@ package org.polyfrost.polynametag.mixin.levelhead;
 
 import cc.polyfrost.oneconfig.utils.MathUtils;
 import org.polyfrost.polynametag.config.ModConfig;
-import org.polyfrost.polynametag.hooks.HooksKt;
+import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -35,7 +35,7 @@ public abstract class AboveHeadRenderMixin_ModifyArgs {
     @Dynamic("LevelHead")
     @ModifyArgs(method = "renderName", remap = false, at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;color(FFFF)Lgg/essential/universal/UGraphics;"))
     private void polyNametag$changeBackgroundColor(Args args) {
-        boolean background = HooksKt.shouldDrawBackground();
+        boolean background = NametagRenderingKt.shouldDrawBackground();
         args.set(0, background ? ModConfig.INSTANCE.getBackgroundColor().getRed() / 255.0F : 0.0F);
         args.set(1, background ? ModConfig.INSTANCE.getBackgroundColor().getGreen() / 255.0F : 0.0F);
         args.set(2, background ? ModConfig.INSTANCE.getBackgroundColor().getBlue() / 255.0F : 0.0F);

@@ -12,7 +12,7 @@ object PolyNametag {
     const val NAME = "@NAME@"
     const val VERSION = "@VER@"
     internal var isPatcher = false
-    private set
+        private set
 
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {

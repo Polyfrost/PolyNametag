@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.polyfrost.polynametag.config.ModConfig;
+import org.polyfrost.polynametag.render.NametagPreview;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,7 +42,7 @@ public abstract class RendererLivingEntityMixin extends Render<EntityLivingBase>
         )
     )
     private Entity polyNametag$cancelSelfCheck(RenderManager renderManager) {
-        boolean shouldShowOwnNametag = ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag();
+        boolean shouldShowOwnNametag = (ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag()) || NametagPreview.INSTANCE.getRenderPreview();
         return shouldShowOwnNametag ? null : renderManager.livingPlayer;
     }
 }

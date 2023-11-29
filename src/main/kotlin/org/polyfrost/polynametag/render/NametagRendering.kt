@@ -1,4 +1,4 @@
-package org.polyfrost.polynametag.hooks
+package org.polyfrost.polynametag.render
 
 import cc.polyfrost.oneconfig.utils.dsl.mc
 import club.sk1er.patcher.config.PatcherConfig

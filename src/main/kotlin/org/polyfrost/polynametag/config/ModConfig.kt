@@ -2,14 +2,19 @@ package org.polyfrost.polynametag.config
 
 import cc.polyfrost.oneconfig.config.Config
 import cc.polyfrost.oneconfig.config.annotations.Color
+import cc.polyfrost.oneconfig.config.annotations.CustomOption
 import cc.polyfrost.oneconfig.config.annotations.Slider
 import cc.polyfrost.oneconfig.config.annotations.Switch
+import cc.polyfrost.oneconfig.config.core.ConfigUtils
 import cc.polyfrost.oneconfig.config.core.OneColor
 import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
+import cc.polyfrost.oneconfig.config.elements.BasicOption
+import cc.polyfrost.oneconfig.config.elements.OptionPage
 import club.sk1er.patcher.config.PatcherConfig
 import org.polyfrost.polynametag.PolyNametag
-import kotlin.reflect.jvm.javaField
+import org.polyfrost.polynametag.render.NametagPreview
+import java.lang.reflect.Field
 
 object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.svg"), "${PolyNametag.MODID}.json") {
 
@@ -31,6 +36,10 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.
     @Color(name = "Background color", description = "The color of the background")
     var backgroundColor = OneColor(0, 0, 0, 63)
 
+    @CustomOption
+    @Transient
+    private val nametagPreview = true
+
     init {
         initialize()
         addDependency("backgroundColor", "background")
@@ -40,5 +49,15 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.
         addDependency("showOwnNametag", "Patcher's Show Own Nametag. Please turn it off to use this feature.") {
             !PolyNametag.isPatcher || !PatcherConfig.showOwnNametag
         }
+    }
+
+    override fun getCustomOption(
+        field: Field,
+        annotation: CustomOption,
+        page: OptionPage,
+        mod: Mod,
+        migrate: Boolean,
+    ): BasicOption = NametagPreview.also {
+        ConfigUtils.getSubCategory(page, "General", "").options.add(it)
     }
 }
