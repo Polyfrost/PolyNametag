@@ -9,6 +9,7 @@ import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
 import club.sk1er.patcher.config.PatcherConfig
 import org.polyfrost.polynametag.PolyNametag
+import kotlin.reflect.jvm.javaField
 
 object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.svg"), "${PolyNametag.MODID}.json") {
 
@@ -35,6 +36,9 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.
         addDependency("backgroundColor", "background")
         addDependency("background", "Patcher's Disable Nametag Boxes. Please turn it off to use this feature.") {
             !PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes
+        }
+        addDependency("showOwnNametag", "Patcher's Show Own Nametag. Please turn it off to use this feature.") {
+            !PolyNametag.isPatcher || !PatcherConfig.showOwnNametag
         }
     }
 }
