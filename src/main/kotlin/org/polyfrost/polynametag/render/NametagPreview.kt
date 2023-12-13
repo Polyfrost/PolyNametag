@@ -12,15 +12,20 @@ import net.minecraft.entity.EntityLivingBase
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import org.lwjgl.opengl.GL11
 import kotlin.math.atan
 import net.minecraft.client.renderer.GlStateManager as GL
 
 object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2) {
     var renderPreview = false
+    var x = 0
+    var y = 0
 
     override fun getHeight() = 696 - (30 + 4 * (32 + 16))
 
     override fun draw(vg: Long, x: Int, y: Int, inputHandler: InputHandler) {
+        this.x = x
+        this.y = y
         renderPreview = true
     }
 
@@ -31,27 +36,30 @@ object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2
     @SubscribeEvent
     fun renderPreview(event: GuiScreenEvent.DrawScreenEvent.Post) {
         if (!renderPreview) return
+        if (mc.currentScreen !is OneConfigGui) return
         val player = mc.thePlayer ?: return
         val unscaleMC = 1 / UResolution.scaleFactor
-        val oneConfigX = UResolution.windowWidth / 2f - 640f
-        val oneConfigY = UResolution.windowHeight / 2f - 400f
-        val oneConfigScale = OneConfigGui.getScaleFactor()
-        val mouseX = (Platform.getMousePlatform().mouseX.toFloat() - oneConfigX) / oneConfigScale
-        val mouseY = (Platform.getMousePlatform().mouseY.toFloat() - oneConfigY) / oneConfigScale
+        val scale = OneConfigGui.getScaleFactor() * (mc.currentScreen as OneConfigGui).animationScaleFactor
+        val x = ((UResolution.windowWidth - 800 * scale) / 2f).toInt()
+        val y = ((UResolution.windowHeight - 768 * scale) / 2f).toInt()
+        val mouseX = (Platform.getMousePlatform().mouseX.toFloat()) / scale
+        val mouseY = (Platform.getMousePlatform().mouseY.toFloat()) / scale
 
         GL.pushMatrix()
         GL.scale(unscaleMC, unscaleMC, 1.0)
-        GL.translate(oneConfigX, oneConfigY, 0f)
-        GL.scale(oneConfigScale, oneConfigScale, 1f)
+        GL.scale(scale, scale, 1f)
+        GL11.glEnable(GL11.GL_SCISSOR_TEST)
+        GL11.glScissor(x, y, (1024 * scale).toInt(), (696 * scale).toInt())
         drawEntityPointingMouse(
             entity = player,
-            x = 224 + 512,
-            y = 72 + 664,
+            x = this.x - 16 + 512,
+            y = this.y + 450,
             scale = 150f,
             mouseX = mouseX,
             mouseY = mouseY
         )
         GL.popMatrix()
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
         renderPreview = false
     }
