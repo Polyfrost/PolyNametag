@@ -30,7 +30,7 @@ fun overrideNametag(renderer: Any, entity: Entity, displayName: String, x: Doubl
 
 private fun Entity.isWithinRange(entity: Entity, range: Int) = getDistanceSqToEntity(entity) < range * range
 
-private fun renderNametag(renderer: Render<*>, entity: Entity, displayName: String, x: Double, y: Double, z: Double) {
+fun renderNametag(renderer: Render<*>, entity: Entity, displayName: String, x: Double, y: Double, z: Double) {
     val fontRenderer = renderer.fontRendererFromRenderManager
     val textHalfWidth = fontRenderer.getStringWidth(displayName) / 2f
     val sneaking = entity.isSneaking

@@ -17,6 +17,7 @@ import kotlin.math.atan
 import net.minecraft.client.renderer.GlStateManager as GL
 
 object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2) {
+    var cancelName = false
     var renderPreview = false
     var x = 0
     var y = 0
@@ -103,7 +104,10 @@ object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2
         renderManager.playerViewX = 0f
         renderManager.playerViewY = 180f
         renderManager.isRenderShadow = false
+        cancelName = true
+        renderNametag(renderManager.getEntityRenderObject<EntityLivingBase>(entity), entity, entity.displayName.formattedText, 0.0, 0.0, 0.0)
         renderManager.doRenderEntity(entity, 0.0, 0.0, 0.0, 0f, 1f, true)
+        cancelName = false
         renderManager.isRenderShadow = true
 
         entity.renderYawOffset = tempRYO
