@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class RenderMixin {
     @Inject(method = "renderLivingLabel", at = @At("HEAD"), cancellable = true)
     private void polyNametag$overrideNametag(Entity entity, String displayName, double x, double y, double z, int range, CallbackInfo callbackInfo) {
-        NametagRenderingKt.overrideNametag(this, entity, displayName, x, y, z, range, callbackInfo);
+        if (NametagRenderingKt.overrideNametag(entity, displayName, x, y, z, range)) {
+            callbackInfo.cancel();
+        }
     }
 }

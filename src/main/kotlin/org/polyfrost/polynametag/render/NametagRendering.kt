@@ -4,46 +4,40 @@ import cc.polyfrost.oneconfig.utils.dsl.mc
 import club.sk1er.patcher.config.PatcherConfig
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.renderer.Tessellator
-import net.minecraft.client.renderer.entity.Render
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
 import org.lwjgl.opengl.GL11
 import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import kotlin.math.max
 import net.minecraft.client.renderer.GlStateManager as GL
 
-
-private const val NAMETAG_SCALE = 0.02666667f
-
-fun overrideNametag(renderer: Any, entity: Entity, displayName: String, x: Double, y: Double, z: Double, range: Int, callbackInfo: CallbackInfo) {
-    if (!ModConfig.enabled) return
-    if (renderer !is Render<*>) return
-
-    if (!entity.isWithinRange(renderer.renderManager.livingPlayer, range)) return
-
-    renderNametag(renderer, entity, displayName, x, y, z)
-    callbackInfo.cancel()
+fun overrideNametag(entity: Entity, displayName: String, x: Double, y: Double, z: Double, range: Int): Boolean {
+    if (!ModConfig.enabled) return false
+    if (!entity.isWithinRange(mc.renderManager.livingPlayer, range)) return false
+    renderNametag(entity, displayName, x, y, z)
+    return true
 }
 
 private fun Entity.isWithinRange(entity: Entity, range: Int) = getDistanceSqToEntity(entity) < range * range
 
-fun renderNametag(renderer: Render<*>, entity: Entity, displayName: String, x: Double, y: Double, z: Double) {
-    val fontRenderer = renderer.fontRendererFromRenderManager
+private const val NAMETAG_SCALE = 0.02666667f
+
+fun renderNametag(entity: Entity, displayName: String, x: Double, y: Double, z: Double) {
+    val fontRenderer = mc.fontRendererObj
     val textHalfWidth = fontRenderer.getStringWidth(displayName) / 2f
     val sneaking = entity.isSneaking
     var yAboveHead = y + entity.height + 0.5 + ModConfig.heightOffset
     if (sneaking) yAboveHead -= 0.25
-    val scale = NAMETAG_SCALE * ModConfig.scale.coerceAtLeast(0f).coerceAtMost(1f)
+    val scale = NAMETAG_SCALE * ModConfig.scale
     val checkPerspective = if (mc.gameSettings.thirdPersonView == 2) -1 else 1
 
     GL11.glNormal3f(0f, 1f, 0f)
     GL.pushMatrix()
     GL.translate(x, yAboveHead, z)
-    GL.rotate(-renderer.renderManager.playerViewY, 0f, 1f, 0f)
-    GL.rotate(renderer.renderManager.playerViewX * checkPerspective, 1f, 0f, 0f)
+    GL.rotate(-mc.renderManager.playerViewY, 0f, 1f, 0f)
+    GL.rotate(mc.renderManager.playerViewX * checkPerspective, 1f, 0f, 0f)
     GL.scale(-scale, -scale, scale)
     GL.disableLighting()
 

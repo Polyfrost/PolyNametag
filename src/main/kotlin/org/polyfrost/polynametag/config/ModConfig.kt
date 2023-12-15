@@ -20,9 +20,11 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.
 
     @Slider(name = "Height offset", min = -0.5f, max = 0.5f, description = "How much to offset the nametag vertically")
     var heightOffset = 0f
+        get() = field.coerceIn(-0.5f, 0.5f)
 
     @Slider(name = "Scale", min = 0f, max = 1f, description = "How much to scale the nametag")
     var scale = 1f
+        get() = field.coerceIn(0f, 1f)
 
     @Switch(name = "Text shadow", description = "Whether to render a shadow behind the nametag")
     var textShadow = false
@@ -38,7 +40,7 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.
 
     @CustomOption
     @Transient
-    private val nametagPreview = true
+    private val nametagPreview = NametagPreview(category = "General")
 
     init {
         initialize()
@@ -57,7 +59,7 @@ object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.
         page: OptionPage,
         mod: Mod,
         migrate: Boolean,
-    ): BasicOption = NametagPreview.also {
-        ConfigUtils.getSubCategory(page, "General", "").options.add(it)
+    ): BasicOption = nametagPreview.also {
+        ConfigUtils.getSubCategory(page, it.category, it.subcategory).options.add(it)
     }
 }

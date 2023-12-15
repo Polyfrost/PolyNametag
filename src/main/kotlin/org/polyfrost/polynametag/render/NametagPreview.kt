@@ -3,7 +3,6 @@ package org.polyfrost.polynametag.render
 import cc.polyfrost.oneconfig.config.elements.BasicOption
 import cc.polyfrost.oneconfig.gui.OneConfigGui
 import cc.polyfrost.oneconfig.libs.universal.UResolution
-import cc.polyfrost.oneconfig.platform.Platform
 import cc.polyfrost.oneconfig.utils.InputHandler
 import cc.polyfrost.oneconfig.utils.dsl.mc
 import net.minecraft.client.renderer.OpenGlHelper
@@ -16,53 +15,49 @@ import org.lwjgl.opengl.GL11
 import kotlin.math.atan
 import net.minecraft.client.renderer.GlStateManager as GL
 
-object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2) {
-    var cancelName = false
-    var renderPreview = false
-    var x = 0
-    var y = 0
-
-    override fun getHeight() = 696 - (30 + 4 * (32 + 16))
-
-    override fun draw(vg: Long, x: Int, y: Int, inputHandler: InputHandler) {
-        this.x = x
-        this.y = y
-        renderPreview = true
-    }
+class NametagPreview(
+    description: String = "",
+    category: String = "",
+    subcategory: String = "",
+) : BasicOption(null, null, "Nametag Preview", description, category, subcategory, 2) {
+    private data class DrawContext(val x: Int, val y: Int, val mouseX: Float, val mouseY: Float)
+    private var drawContext: DrawContext? = null
 
     init {
         MinecraftForge.EVENT_BUS.register(this)
     }
 
+    override fun getHeight() = 696 - (30 + 4 * (32 + 16))
+
+    override fun draw(vg: Long, x: Int, y: Int, inputHandler: InputHandler) {
+        drawContext = DrawContext(x, y, inputHandler.mouseX(), inputHandler.mouseY())
+    }
+
     @SubscribeEvent
     fun renderPreview(event: GuiScreenEvent.DrawScreenEvent.Post) {
-        if (!renderPreview) return
-        if (mc.currentScreen !is OneConfigGui) return
+        val (oneUIX, oneUIY, mouseX, mouseY) = drawContext ?: return
+        drawContext = null
+        val oneConfigGui = mc.currentScreen as? OneConfigGui ?: return
         val player = mc.thePlayer ?: return
         val unscaleMC = 1 / UResolution.scaleFactor
-        val scale = OneConfigGui.getScaleFactor() * (mc.currentScreen as OneConfigGui).animationScaleFactor
-        val x = ((UResolution.windowWidth - 800 * scale) / 2f).toInt()
-        val y = ((UResolution.windowHeight - 768 * scale) / 2f).toInt()
-        val mouseX = (Platform.getMousePlatform().mouseX.toFloat()) / scale
-        val mouseY = (Platform.getMousePlatform().mouseY.toFloat()) / scale
+        val oneUIScale = OneConfigGui.getScaleFactor() * oneConfigGui.animationScaleFactor
+        val rawX = ((UResolution.windowWidth - 800 * oneUIScale) / 2f).toInt()
+        val rawY = ((UResolution.windowHeight - 768 * oneUIScale) / 2f).toInt()
 
         GL.pushMatrix()
-        GL.scale(unscaleMC, unscaleMC, 1.0)
-        GL.scale(scale, scale, 1f)
+        GL.scale(unscaleMC * oneUIScale, unscaleMC * oneUIScale, 1.0)
         GL11.glEnable(GL11.GL_SCISSOR_TEST)
-        GL11.glScissor(x, y, (1024 * scale).toInt(), (696 * scale).toInt())
+        GL11.glScissor(rawX, rawY, (1024 * oneUIScale).toInt(), (696 * oneUIScale).toInt())
         drawEntityPointingMouse(
             entity = player,
-            x = this.x - 16 + 512,
-            y = this.y + 450,
+            x = oneUIX - 16 + 512,
+            y = oneUIY + 450,
             scale = 150f,
             mouseX = mouseX,
             mouseY = mouseY
         )
+        GL11.glDisable(GL11.GL_SCISSOR_TEST)
         GL.popMatrix()
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-
-        renderPreview = false
     }
 
     fun drawEntityPointingMouse(
@@ -89,6 +84,7 @@ object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2
         val tempRP = entity.rotationPitch
         val tempPRYH = entity.prevRotationYawHead
         val tempRYN = entity.rotationYawHead
+        val tempRBE = entity.riddenByEntity
 
         GL.rotate(135f, 0f, 1f, 0f)
         RenderHelper.enableStandardItemLighting()
@@ -99,15 +95,14 @@ object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2
         entity.rotationYawHead = entity.rotationYaw
         entity.prevRotationYawHead = entity.rotationYaw
         entity.rotationPitch = -atan(dy / 40f) * 20f
+        entity.riddenByEntity = entity // cancel nametag
 
         val renderManager = mc.renderManager
         renderManager.playerViewX = 0f
         renderManager.playerViewY = 180f
         renderManager.isRenderShadow = false
-        cancelName = true
-        renderNametag(renderManager.getEntityRenderObject<EntityLivingBase>(entity), entity, entity.displayName.formattedText, 0.0, 0.0, 0.0)
+        renderNametag(entity, entity.displayName.formattedText, 0.0, 0.0, 0.0)
         renderManager.doRenderEntity(entity, 0.0, 0.0, 0.0, 0f, 1f, true)
-        cancelName = false
         renderManager.isRenderShadow = true
 
         entity.renderYawOffset = tempRYO
@@ -115,6 +110,7 @@ object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2
         entity.rotationPitch = tempRP
         entity.prevRotationYawHead = tempPRYH
         entity.rotationYawHead = tempRYN
+        entity.riddenByEntity = tempRBE
 
         GL.popMatrix()
         RenderHelper.disableStandardItemLighting()
@@ -124,4 +120,3 @@ object NametagPreview : BasicOption(null, null, "Nametag Preview", "", "", "", 2
         GL.setActiveTexture(OpenGlHelper.defaultTexUnit)
     }
 }
-

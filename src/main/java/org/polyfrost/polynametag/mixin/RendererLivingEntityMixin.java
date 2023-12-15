@@ -6,13 +6,11 @@ import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.polyfrost.polynametag.config.ModConfig;
-import org.polyfrost.polynametag.render.NametagPreview;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = RendererLivingEntity.class, priority = 1001)
 public abstract class RendererLivingEntityMixin extends Render<EntityLivingBase> {
@@ -45,12 +43,5 @@ public abstract class RendererLivingEntityMixin extends Render<EntityLivingBase>
     private Entity polyNametag$cancelSelfCheck(RenderManager renderManager) {
         boolean shouldShowOwnNametag = (ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag());
         return shouldShowOwnNametag ? null : renderManager.livingPlayer;
-    }
-
-    @Inject(method = "canRenderName(Lnet/minecraft/entity/EntityLivingBase;)Z", at = @At("HEAD"), cancellable = true)
-    private void CancelPreview(CallbackInfoReturnable<Boolean> cir) {
-        if (NametagPreview.INSTANCE.getCancelName()) {
-            cir.setReturnValue(false);
-        }
     }
 }
