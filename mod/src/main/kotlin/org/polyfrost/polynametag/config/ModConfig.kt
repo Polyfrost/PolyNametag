@@ -16,7 +16,7 @@ import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.render.NametagPreview
 import java.lang.reflect.Field
 
-object ModConfig : Config(Mod(PolyNametag.NAME, ModType.UTIL_QOL, "/polynametag.svg"), "${PolyNametag.MODID}.json") {
+object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"), "${PolyNametag.MODID}.json") {
 
     @Slider(name = "Height offset", min = -0.5f, max = 0.5f, description = "How much to offset the nametag vertically")
     var heightOffset = 0f
