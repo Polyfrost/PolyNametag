@@ -10,6 +10,7 @@
     "FontRendererAccessor",
     "RendererLivingEntityMixin",
     "RenderMixin",
+    "essential.OnlineIndicatorMixin",
     "levelhead.AboveHeadRenderMixin",
     "levelhead.AboveHeadRenderMixin_ModifyArgs"
   ],
