@@ -43,5 +43,11 @@ jobs:
       - name: Chmod Gradle
         run: chmod +x ./gradlew
 
-      - name: Build
-        run: ./gradlew build --no-daemon
+      - name: Build Mod Compat
+        run: ./gradlew :mod-compat:build --no-daemon
+
+      - name: Gradle Sync
+        run: ./gradlew
+
+      - name: Build Mod
+        run: ./gradlew :mod:build --no-daemon
