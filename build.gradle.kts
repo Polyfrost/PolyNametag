@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage", "PropertyName")
 
-import org.polyfrost.gradle.util.noServerRunConfigs
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.polyfrost.gradle.util.noServerRunConfigs
 
 // Adds support for kotlin, and adds the Polyfrost Gradle Toolkit
 // which we use to prepare the environment.
@@ -81,6 +81,7 @@ val shade: Configuration by configurations.creating {
 sourceSets {
     val dummy by creating
     main {
+        dummy.compileClasspath += compileClasspath
         compileClasspath += dummy.output
         output.setResourcesDir(java.classesDirectory)
     }
@@ -95,8 +96,13 @@ repositories {
 dependencies {
     // Adds the OneConfig library, so we can develop with it.
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.1-alpha+")
-    "dummyCompileOnly"("net.minecraft:forge-1.8.9-11.15.1.2318-1.8.9-minecraft-merged-generated-intermediate:1.8.9-de.oceanlabs.mcp.mcp_stable.1_8_9.22-1.8.9-forge-1.8.9-11.15.1.2318-1.8.9")
-    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (platform.isFabric) "fabric" else if (platform.isLegacyForge) "forge-legacy" else "forge-latest"}:1.1.2")
+
+    val loaderPlatform = when {
+        platform.isFabric -> "fabric"
+        platform.isLegacyForge -> "forge-legacy"
+        else -> "forge-latest"
+    }
+    modRuntimeOnly("me.djtheredstoner:DevAuth-$loaderPlatform:1.1.2")
     // If we are building for legacy forge, includes the launch wrapper with `shade` as we configured earlier.
     if (platform.isLegacyForge) {
         compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
@@ -110,14 +116,10 @@ tasks {
     processResources {
         inputs.property("id", mod_id)
         inputs.property("name", mod_name)
-        val java = if (project.platform.mcMinor >= 18) {
-            17 // If we are playing on version 1.18, set the java version to 17
-        } else {
-            // Else if we are playing on version 1.17, use java 16.
-            if (project.platform.mcMinor == 17)
-                16
-            else
-                8 // For all previous versions, we **need** java 8 (for Forge support).
+        val java = when (project.platform.mcMinor) {
+            in 18..99 -> 17 // If we are playing on version 1.18, set the java version to 17
+            17 -> 16 // Else if we are playing on version 1.17, use java 16.
+            else -> 8 // For all previous versions, we **need** java 8 (for Forge support).
         }
         val compatLevel = "JAVA_${java}"
         inputs.property("java", java)
