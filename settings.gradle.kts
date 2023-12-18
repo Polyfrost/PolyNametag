@@ -16,24 +16,16 @@ val mod_name: String by settings
 
 // Configures the root project Gradle name based on the value in `gradle.properties`
 rootProject.name = mod_name
-rootProject.buildFileName = "build.gradle.kts"
-
-include(":mod-compat")
-
-include(":mod")
-project(":mod").apply {
-    projectDir = file("mod/")
-    buildFileName = "root.gradle.kts"
-}
+rootProject.buildFileName = "root.gradle.kts"
 
 // Adds all of our build target versions to the classpath if we need to add version-specific code.
 listOf(
     "1.8.9-forge", // Update this if you want to remove/add a version, along with `build.gradle.kts` and `root.gradle.kts`.
 //    "1.12.2-forge"
 ).forEach { version ->
-    include(":mod:$version")
-    project(":mod:$version").apply {
-        projectDir = file("mod/versions/$version")
+    include(":$version")
+    project(":$version").apply {
+        projectDir = file("versions/$version")
         buildFileName = "../../build.gradle.kts"
     }
 }
