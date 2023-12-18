@@ -1,4 +1,4 @@
-<img style="float: right" src="src/main/resources/polynametag.svg" alt="PolyNametag Icon"/>
+<img align="right" src="src/main/resources/polynametag.svg" alt="PolyNametag Icon"/>
 
 # PolyNametag
 
