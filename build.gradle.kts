@@ -93,11 +93,6 @@ repositories {
 
 // Configures the libraries/dependencies for your mod.
 dependencies {
-    components {
-        all {
-            println(this)
-        }
-    }
     // Adds the OneConfig library, so we can develop with it.
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.1-alpha+")
     "dummyCompileOnly"("net.minecraft:forge-1.8.9-11.15.1.2318-1.8.9-minecraft-merged-generated-intermediate:1.8.9-de.oceanlabs.mcp.mcp_stable.1_8_9.22-1.8.9-forge-1.8.9-11.15.1.2318-1.8.9")
