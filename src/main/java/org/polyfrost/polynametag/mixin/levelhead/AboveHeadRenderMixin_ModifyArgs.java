@@ -1,12 +1,13 @@
 package org.polyfrost.polynametag.mixin.levelhead;
 
-import cc.polyfrost.oneconfig.utils.MathUtils;
 import org.polyfrost.polynametag.config.ModConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 /**
@@ -20,13 +21,15 @@ public abstract class AboveHeadRenderMixin_ModifyArgs {
     @Dynamic("LevelHead")
     @ModifyArg(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics$GL;translate(FFF)V"), index = 1, remap = false)
     private float polyNametag$changeOffset(float original) {
+        if (!ModConfig.INSTANCE.enabled) return original;
         return original + ModConfig.INSTANCE.getHeightOffset();
     }
 
     @Dynamic("LevelHead")
     @ModifyArgs(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics$GL;scale(DDD)V"), remap = false)
     private void polyNametag$changeScale(Args args) {
-        double scale = MathUtils.clamp(ModConfig.INSTANCE.getScale(), 0.0F, 1F);
+        if (!ModConfig.INSTANCE.enabled) return;
+        double scale = ModConfig.INSTANCE.getScale();
         args.set(0, ((double) args.get(0)) * scale);
         args.set(1, ((double) args.get(1)) * scale);
         args.set(2, ((double) args.get(2)) * scale);
@@ -35,10 +38,26 @@ public abstract class AboveHeadRenderMixin_ModifyArgs {
     @Dynamic("LevelHead")
     @ModifyArgs(method = "renderName", remap = false, at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;color(FFFF)Lgg/essential/universal/UGraphics;"))
     private void polyNametag$changeBackgroundColor(Args args) {
-        boolean background = NametagRenderingKt.shouldDrawBackground();
-        args.set(0, background ? ModConfig.INSTANCE.getBackgroundColor().getRed() / 255.0F : 0.0F);
-        args.set(1, background ? ModConfig.INSTANCE.getBackgroundColor().getGreen() / 255.0F : 0.0F);
-        args.set(2, background ? ModConfig.INSTANCE.getBackgroundColor().getBlue() / 255.0F : 0.0F);
-        args.set(3, background ? ModConfig.INSTANCE.getBackgroundColor().getAlpha() / 255.0F : 0.0F);
+        if (!ModConfig.INSTANCE.enabled) return;
+        float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
+        args.set(0, color[0]);
+        args.set(1, color[1]);
+        args.set(2, color[2]);
+        args.set(3, color[3]);
+    }
+
+    @Dynamic("LevelHead")
+    @ModifyArg(
+        method = "renderName",
+        remap = false,
+        at = @At(
+            value = "INVOKE",
+            target = "Lgg/essential/universal/UGraphics;pos(DDD)Lgg/essential/universal/UGraphics;"
+        ),
+        index = 2
+    )
+    private double polyNametag$modifyBackgroundZ(double z) {
+        if (!ModConfig.INSTANCE.enabled) return z;
+        return z + 0.01;
     }
 }

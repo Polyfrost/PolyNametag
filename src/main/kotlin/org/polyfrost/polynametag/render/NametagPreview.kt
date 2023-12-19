@@ -7,6 +7,7 @@ import cc.polyfrost.oneconfig.utils.InputHandler
 import cc.polyfrost.oneconfig.utils.dsl.mc
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
+import net.minecraft.client.renderer.entity.RendererLivingEntity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.common.MinecraftForge
@@ -95,13 +96,14 @@ class NametagPreview(
         entity.rotationYawHead = entity.rotationYaw
         entity.prevRotationYawHead = entity.rotationYaw
         entity.rotationPitch = -atan(dy / 40f) * 20f
-        entity.riddenByEntity = entity // cancel nametag
 
         val renderManager = mc.renderManager
         renderManager.playerViewX = 0f
         renderManager.playerViewY = 180f
         renderManager.isRenderShadow = false
-        renderNametag(entity, entity.displayName.formattedText, 0.0, 0.0, 0.0)
+        val renderer = renderManager.getEntityRenderObject<EntityLivingBase>(entity) as RendererLivingEntity
+        renderer.renderName(entity, 0.0, 0.0, 0.0)
+        entity.riddenByEntity = entity // cancel original nametag
         renderManager.doRenderEntity(entity, 0.0, 0.0, 0.0, 0f, 1f, true)
         renderManager.isRenderShadow = true
 

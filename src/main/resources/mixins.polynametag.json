@@ -12,7 +12,8 @@
     "RenderMixin",
     "essential.OnlineIndicatorMixin",
     "levelhead.AboveHeadRenderMixin",
-    "levelhead.AboveHeadRenderMixin_ModifyArgs"
+    "levelhead.AboveHeadRenderMixin_ModifyArgs",
+    "patcher.NameTagRenderingHooksMixin"
   ],
   "verbose": true
 }
