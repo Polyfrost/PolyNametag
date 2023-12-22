@@ -1,12 +1,10 @@
 package org.polyfrost.polynametag.config
 
 import cc.polyfrost.oneconfig.config.Config
-import cc.polyfrost.oneconfig.config.annotations.Color
-import cc.polyfrost.oneconfig.config.annotations.CustomOption
-import cc.polyfrost.oneconfig.config.annotations.Slider
-import cc.polyfrost.oneconfig.config.annotations.Switch
+import cc.polyfrost.oneconfig.config.annotations.*
 import cc.polyfrost.oneconfig.config.core.ConfigUtils
 import cc.polyfrost.oneconfig.config.core.OneColor
+import cc.polyfrost.oneconfig.config.data.InfoType
 import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
 import cc.polyfrost.oneconfig.config.elements.BasicOption
@@ -26,8 +24,14 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     var scale = 1f
         get() = field.coerceIn(0f, 1f)
 
-    @Switch(name = "Text shadow", description = "Whether to render a shadow behind the nametag")
-    var textShadow = false
+    @Dropdown(name = "Text Type", options = ["No Shadow", "Shadow", "Full Shadow"], description = "The type of shadow to render")
+    var textType = 0
+
+    @Info(
+        type = InfoType.WARNING,
+        text = "Using Full Shadow may cause performance issues on low-end devices"
+    )
+    var info1 = 0
 
     @Switch(name = "Show own nametag", description = "Whether to show your own nametag")
     var showOwnNametag = true

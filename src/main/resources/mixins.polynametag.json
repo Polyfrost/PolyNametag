@@ -13,6 +13,7 @@
     "essential.OnlineIndicatorMixin",
     "levelhead.AboveHeadRenderMixin",
     "levelhead.AboveHeadRenderMixin_ModifyArgs",
+    "oneconfig.TextRendererMixin",
     "patcher.NameTagRenderingHooksMixin"
   ],
   "verbose": true
