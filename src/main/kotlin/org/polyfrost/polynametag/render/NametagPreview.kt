@@ -28,7 +28,7 @@ class NametagPreview(
         MinecraftForge.EVENT_BUS.register(this)
     }
 
-    override fun getHeight() = 0
+    override fun getHeight() = 696 - (30 + 4 * (32 + 16))
 
     override fun draw(vg: Long, x: Int, y: Int, inputHandler: InputHandler) {
         drawContext = DrawContext(x, y, inputHandler.mouseX(), inputHandler.mouseY())

@@ -13,7 +13,6 @@ import club.sk1er.patcher.config.PatcherConfig
 import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.render.NametagPreview
 import java.lang.reflect.Field
-import kotlin.math.min
 
 object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"), "${PolyNametag.MODID}.json") {
 
@@ -24,16 +23,6 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     @Slider(name = "Scale", min = 0f, max = 1f, description = "How much to scale the nametag")
     var scale = 1f
         get() = field.coerceIn(0f, 1f)
-
-    @Slider(name = "X-Padding", min = 0f, max = 10f, description = "The horizontal padding of the background")
-    var paddingX = 0f
-
-    @Slider(name = "Y-Padding", min = 0f, max = 10f, description = "The vertical padding of the background")
-    var paddingY = 0f
-
-    @Slider(name = "Corner Radius", min = 0f, max = 10f, description = "The corner radius of the background")
-    var radius = 0f
-        get() = field.coerceIn(0f, 4.5f + min(paddingX, paddingY))
 
     @Dropdown(name = "Text Type", options = ["No Shadow", "Shadow", "Full Shadow"], description = "The type of shadow to render")
     var textType = 0

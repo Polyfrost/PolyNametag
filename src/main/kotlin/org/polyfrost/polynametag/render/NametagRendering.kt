@@ -5,14 +5,11 @@ import club.sk1er.patcher.config.PatcherConfig
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
-import org.lwjgl.opengl.GL11
 import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
 import java.util.regex.Pattern
-import kotlin.math.cos
 import kotlin.math.max
-import kotlin.math.sin
 import net.minecraft.client.renderer.GlStateManager as GL
 
 internal fun shouldDrawBackground() = ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
@@ -37,12 +34,8 @@ fun drawFrontBackgroundForText(text: String) {
     drawBackground(mc.fontRendererObj.getStringWidth(text) / 2, maxAlpha = 0xFF)
 }
 
-fun drawBackground(text: String, maxAlpha: Int = 255) {
-    drawBackground(mc.fontRendererObj.getStringWidth(text) / 2, maxAlpha)
-}
-
 private fun drawBackground(textHalfWidth: Int, maxAlpha: Int = 255) {
-    val halfWidth = textHalfWidth + 1.0 + ModConfig.paddingX
+    val halfWidth = textHalfWidth + 1.0
     drawBackground(-halfWidth, halfWidth, maxAlpha)
 }
 
@@ -59,24 +52,11 @@ fun drawBackground(xStart: Double, xEnd: Double, maxAlpha: Int = 255) {
     val tessellator = Tessellator.getInstance()
 
     with(tessellator.worldRenderer) {
-        begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION)
-        for (i in 1..360) {
-            val radius = ModConfig.radius
-            val quadrants = i / 90
-            val centerX = when (quadrants) {
-                0, 1 -> xEnd - radius
-                2, 3 -> xStart + radius
-                else -> 0.0
-            }
-            val centerY = when (quadrants) {
-                0, 3 -> 8.0 + ModConfig.paddingY - radius
-                1, 2 -> -1.0 - ModConfig.paddingY + radius
-                else -> 0.0
-            }
-            val x = sin(Math.toRadians(i.toDouble())) * radius
-            val y = cos(Math.toRadians(i.toDouble())) * radius
-            pos(centerX + x, centerY + y, 0.0).endVertex()
-        }
+        begin(7, DefaultVertexFormats.POSITION)
+        pos(xStart, -1.0, 0.01).endVertex()
+        pos(xStart, 8.0, 0.01).endVertex()
+        pos(xEnd, 8.0, 0.01).endVertex()
+        pos(xEnd, -1.0, 0.01).endVertex()
     }
 
     tessellator.draw()
