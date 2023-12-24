@@ -65,6 +65,7 @@ public abstract class AboveHeadRenderMixin {
     private void polyNametag$drawFrontBackground(LevelheadTag tag, EntityPlayer player, double x, double y, double z, CallbackInfo ci) {
         GlStateManager.enableDepth();
         GlStateManager.depthMask(true);
-        NametagRenderingKt.drawFrontBackgroundForText(tag.getString());
+        int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
+        NametagRenderingKt.drawBackground(-stringWidth - 2, stringWidth + 1, 0xFF);
     }
 }
