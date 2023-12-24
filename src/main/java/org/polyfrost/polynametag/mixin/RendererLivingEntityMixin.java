@@ -3,6 +3,7 @@ package org.polyfrost.polynametag.mixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
@@ -73,6 +74,31 @@ public abstract class RendererLivingEntityMixin  {
         float scale = ModConfig.INSTANCE.getScale();
         GlStateManager.scale(scale, scale, scale);
     }
+
+    @Inject(
+            method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/Tessellator;draw()V"
+            )
+    )
+    private void cancel(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
+        Tessellator.getInstance().getWorldRenderer().reset();
+    }
+
+    @Inject(
+        method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/GlStateManager;depthMask(Z)V",
+            ordinal = 1,
+            shift = At.Shift.AFTER
+        )
+    )
+    private void polyNametag$drawBackground(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
+        NametagRenderingKt.drawBackground(entity.getDisplayName().getFormattedText(), 0x20);
+    }
+
 
     @ModifyArgs(
         method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V",

@@ -2,17 +2,14 @@ package org.polyfrost.polynametag.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import org.polyfrost.polynametag.PolyNametag;
 import org.polyfrost.polynametag.config.ModConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
@@ -90,6 +87,29 @@ public abstract class RenderMixin {
     }
 
     @Inject(
+            method = "renderLivingLabel",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/Tessellator;draw()V"
+            )
+    )
+    private void cancel(Entity entityIn, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
+        Tessellator.getInstance().getWorldRenderer().reset();
+    }
+
+    @Inject(
+        method = "renderLivingLabel",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/Tessellator;draw()V",
+            shift = At.Shift.AFTER
+        )
+    )
+    private void wall(Entity entity, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
+        NametagRenderingKt.drawBackground(str, 0x3F);
+    }
+
+    @Inject(
         method = "renderLivingLabel",
         at = @At(
             value = "INVOKE",
@@ -98,8 +118,8 @@ public abstract class RenderMixin {
             shift = At.Shift.AFTER
         )
     )
-    private void polyNametag$drawBackground(Entity entity, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
-        NametagRenderingKt.drawFrontBackgroundForText(str);
+    private void full(Entity entity, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
+        NametagRenderingKt.drawBackground(str, 0xFF);
     }
 
     @Redirect(
