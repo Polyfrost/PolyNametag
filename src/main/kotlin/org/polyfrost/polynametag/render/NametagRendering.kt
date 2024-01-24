@@ -17,7 +17,7 @@ internal fun shouldDrawBackground() = ModConfig.background && (!PolyNametag.isPa
 val NO_COLOR_FLOAT = floatArrayOf(0f, 0f, 0f, 0f)
 fun getBackBackgroundGLColorOrEmpty(): FloatArray =
     if (shouldDrawBackground()) with(ModConfig.backgroundColor) {
-        floatArrayOf(red / 255f, green / 255f, blue / 255f, alpha.coerceAtMost(0x20) / 255f)
+        floatArrayOf(red / 255f, green / 255f, blue / 255f, alpha.coerceAtMost(0x3F) / 255f)
     } else {
         NO_COLOR_FLOAT
     }
@@ -25,13 +25,14 @@ fun getBackBackgroundGLColorOrEmpty(): FloatArray =
 val NO_COLOR_INT = intArrayOf(0, 0, 0, 0)
 fun getBackBackgroundColorOrEmpty(): IntArray =
     if (shouldDrawBackground()) with(ModConfig.backgroundColor) {
-        intArrayOf(red, green, blue, alpha.coerceAtMost(0x20))
+        intArrayOf(red, green, blue, alpha.coerceAtMost(0x3F))
     } else {
         NO_COLOR_INT
     }
 
 fun drawFrontBackgroundForText(text: String) {
-    drawBackground(mc.fontRendererObj.getStringWidth(text) / 2, maxAlpha = 0xFF)
+    if (ModConfig.fixEntityBehindBackground) return
+    drawBackground(mc.fontRendererObj.getStringWidth(text) / 2)
 }
 
 private fun drawBackground(textHalfWidth: Int, maxAlpha: Int = 255) {
@@ -97,6 +98,7 @@ internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Int, y: Fl
             GL.popMatrix()
             return i
         }
+
         1 -> {
             GL.enableAlpha()
             invokeResetStyles()
@@ -108,6 +110,7 @@ internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Int, y: Fl
 
             return max(shadowX, normalX)
         }
+
         2 -> {
             GL.enableAlpha()
             invokeResetStyles()
