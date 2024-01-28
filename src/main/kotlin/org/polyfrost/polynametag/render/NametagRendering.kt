@@ -30,24 +30,22 @@ fun getBackBackgroundColorOrEmpty(): IntArray =
         NO_COLOR_INT
     }
 
-fun drawFrontBackgroundForText(text: String) {
+fun drawFrontBackground(text: String) {
     if (ModConfig.fixEntityBehindBackground) return
-    drawBackground(mc.fontRendererObj.getStringWidth(text) / 2)
+    val halfWidth = mc.fontRendererObj.getStringWidth(text) / 2 + 1.0
+    drawFrontBackground(-halfWidth, halfWidth)
 }
 
-private fun drawBackground(textHalfWidth: Int, maxAlpha: Int = 255) {
-    val halfWidth = textHalfWidth + 1.0
-    drawBackground(-halfWidth, halfWidth, maxAlpha)
-}
-
-fun drawBackground(xStart: Double, xEnd: Double, maxAlpha: Int = 255) {
+fun drawFrontBackground(xStart: Double, xEnd: Double) {
     if (!ModConfig.enabled) return
+    if (ModConfig.fixEntityBehindBackground) return
     if (!shouldDrawBackground()) return
 
     GL.disableTexture2D()
 
+
     with(ModConfig.backgroundColor) {
-        GL.color(red / 255f, green / 255f, blue / 255f, alpha.coerceAtMost(maxAlpha) / 255f)
+        GL.color(red / 255f, green / 255f, blue / 255f, alpha.coerceAtMost(0x3F) / 255f)
     }
 
     val tessellator = Tessellator.getInstance()

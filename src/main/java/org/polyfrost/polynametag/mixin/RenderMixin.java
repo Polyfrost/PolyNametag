@@ -99,7 +99,7 @@ public abstract class RenderMixin {
         )
     )
     private void polyNametag$drawBackground(Entity entity, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
-        NametagRenderingKt.drawFrontBackgroundForText(str);
+        NametagRenderingKt.drawFrontBackground(str);
     }
 
     @Redirect(

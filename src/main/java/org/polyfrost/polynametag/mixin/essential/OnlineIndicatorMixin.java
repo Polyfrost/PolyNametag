@@ -50,7 +50,7 @@ public class OnlineIndicatorMixin {
     )
     private static void polyNametag$drawFrontBackground(@Coerce Object matrices, Entity entity, String str, int light, CallbackInfo ci) {
         int x = -Minecraft.getMinecraft().fontRendererObj.getStringWidth(str) / 2;
-        NametagRenderingKt.drawBackground(x - 11, x - 1, 0xFF);
+        NametagRenderingKt.drawFrontBackground(x - 11, x - 1);
     }
 
     @Dynamic("Essential")

@@ -66,6 +66,6 @@ public abstract class AboveHeadRenderMixin {
         GlStateManager.enableDepth();
         GlStateManager.depthMask(true);
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
-        NametagRenderingKt.drawBackground(-stringWidth - 2, stringWidth + 1, 0xFF);
+        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1);
     }
 }
