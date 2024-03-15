@@ -31,21 +31,19 @@ fun getBackBackgroundColorOrEmpty(): IntArray =
     }
 
 fun drawFrontBackground(text: String) {
-    if (ModConfig.fixEntityBehindBackground) return
     val halfWidth = mc.fontRendererObj.getStringWidth(text) / 2 + 1.0
     drawFrontBackground(-halfWidth, halfWidth)
 }
 
 fun drawFrontBackground(xStart: Double, xEnd: Double) {
     if (!ModConfig.enabled) return
-    if (ModConfig.fixEntityBehindBackground) return
     if (!shouldDrawBackground()) return
 
     GL.disableTexture2D()
 
 
     with(ModConfig.backgroundColor) {
-        GL.color(red / 255f, green / 255f, blue / 255f, alpha.coerceAtMost(0x3F) / 255f)
+        GL.color(red / 255f, green / 255f, blue / 255f, alpha / 255f)
     }
 
     val tessellator = Tessellator.getInstance()

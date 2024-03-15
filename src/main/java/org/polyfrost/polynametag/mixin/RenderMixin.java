@@ -94,8 +94,7 @@ public abstract class RenderMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/GlStateManager;depthMask(Z)V",
-            ordinal = 1,
-            shift = At.Shift.AFTER
+            ordinal = 1
         )
     )
     private void polyNametag$drawBackground(Entity entity, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {

@@ -42,13 +42,6 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     @Color(name = "Background color", description = "The color of the background")
     var backgroundColor = OneColor(0, 0, 0, 63)
 
-    @Switch(
-        name = "Fix Entities Behind Background (Will Disable Background with Opacity Higher than Vanilla)",
-        description = "Fix entities not being drawn behind background. Due to the way entity rendering is done, and to ensure legitimacy, it is challenging to maintain both features simultaneously.",
-        size = 2
-    )
-    var fixEntityBehindBackground = true
-
     @CustomOption
     @Transient
     private val nametagPreview = NametagPreview(category = "General")
