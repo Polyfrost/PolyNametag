@@ -1,14 +1,14 @@
 package org.polyfrost.polynametag.mixin.essential;
 
-import net.minecraft.client.Minecraft;
+import gg.essential.universal.UMatrixStack;
 import net.minecraft.entity.Entity;
+import org.polyfrost.polynametag.PolyNametag;
 import org.polyfrost.polynametag.config.ModConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
@@ -30,27 +30,13 @@ public class OnlineIndicatorMixin {
     )
     private static void polyNametag$modifyNametagColor(Args args) {
         if (!ModConfig.INSTANCE.enabled) return;
-        int[] color = NametagRenderingKt.getBackBackgroundColorOrEmpty();
-        args.set(0, color[0]);
-        args.set(1, color[1]);
-        args.set(2, color[2]);
-        args.set(3, color[3]);
+        args.set(3, 0);
     }
 
     @Dynamic("Essential")
-    @Inject(
-        method = "drawNametagIndicator(Lgg/essential/universal/UMatrixStack;Lnet/minecraft/entity/Entity;Ljava/lang/String;I)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lgg/essential/universal/UGraphics;drawDirect()V",
-            remap = false,
-            ordinal = 1,
-            shift = At.Shift.AFTER
-        )
-    )
-    private static void polyNametag$drawFrontBackground(@Coerce Object matrices, Entity entity, String str, int light, CallbackInfo ci) {
-        int x = -Minecraft.getMinecraft().fontRendererObj.getStringWidth(str) / 2;
-        NametagRenderingKt.drawFrontBackground(x - 11, x - 1);
+    @Inject(method = "drawNametagIndicator", at = @At("HEAD"), cancellable = true)
+    private static void skip(UMatrixStack matrixStack, Entity entity, String str, int light, CallbackInfo ci) {
+        if (!PolyNametag.INSTANCE.getDrawingEssential()) ci.cancel();
     }
 
     @Dynamic("Essential")

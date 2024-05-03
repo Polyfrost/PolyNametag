@@ -23,6 +23,7 @@ class NametagPreview(
 ) : BasicOption(null, null, "Nametag Preview", description, category, subcategory, 2) {
     private data class DrawContext(val x: Int, val y: Int, val mouseX: Float, val mouseY: Float)
     private var drawContext: DrawContext? = null
+    var drawing = false
 
     init {
         MinecraftForge.EVENT_BUS.register(this)
@@ -102,7 +103,9 @@ class NametagPreview(
         renderManager.playerViewY = 180f
         renderManager.isRenderShadow = false
         val renderer = renderManager.getEntityRenderObject<EntityLivingBase>(entity) as RendererLivingEntity
+        drawing = true
         renderer.renderName(entity, 0.0, 0.0, 0.0)
+        drawing = false
         entity.riddenByEntity = entity // cancel original nametag
         renderManager.doRenderEntity(entity, 0.0, 0.0, 0.0, 0f, 1f, true)
         renderManager.isRenderShadow = true

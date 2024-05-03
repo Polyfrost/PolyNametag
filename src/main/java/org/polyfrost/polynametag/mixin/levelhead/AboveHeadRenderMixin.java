@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
+import org.polyfrost.polynametag.PolyNametag;
 import org.polyfrost.polynametag.config.ModConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
@@ -16,13 +17,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.awt.*;
+
 /**
  * Taken from Patcher under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
  * https://github.com/Sk1erLLC/Patcher/blob/master/LICENSE.md
  */
 @Pseudo
-@Mixin(targets = "club.sk1er.mods.levelhead.render.AboveHeadRender", priority = 1001)
+@Mixin(targets = "club.sk1er.mods.levelhead.render.AboveHeadRender", priority = 1001, remap = false)
 public abstract class AboveHeadRenderMixin {
+
+    @Dynamic("LevelHead")
+    @Inject(method = "renderName", at = @At("HEAD"))
+    private void move(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
+        PolyNametag.INSTANCE.setDrawEssential(false);
+    }
 
     @Dynamic("LevelHead")
     @Redirect(
@@ -31,8 +40,7 @@ public abstract class AboveHeadRenderMixin {
             value = "INVOKE",
             target = "Lclub/sk1er/mods/levelhead/render/AboveHeadRender;isSelf(Lnet/minecraft/entity/player/EntityPlayer;)Z",
             ordinal = 1
-        ),
-        remap = false
+        )
     )
     private boolean polyNametag$screwYouLevelhead(@Coerce Object instance, EntityPlayer player) {
         return !(ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag()) && Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.getUniqueID().equals(player.getUniqueID());
@@ -41,7 +49,6 @@ public abstract class AboveHeadRenderMixin {
     @Dynamic("LevelHead")
     @Redirect(
         method = "render(Lnet/minecraft/client/gui/FontRenderer;Lclub/sk1er/mods/levelhead/display/LevelheadTag$LevelheadComponent;I)V",
-        remap = false,
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I",
@@ -54,18 +61,13 @@ public abstract class AboveHeadRenderMixin {
     }
 
     @Dynamic("LevelHead")
-    @Inject(
-        method = "renderName",
-        remap = false,
-        at = @At(
-            value = "INVOKE",
-            target = "Lgg/essential/universal/UGraphics;enableLighting()V"
-        )
-    )
-    private void polyNametag$drawFrontBackground(LevelheadTag tag, EntityPlayer player, double x, double y, double z, CallbackInfo ci) {
-        GlStateManager.enableDepth();
-        GlStateManager.depthMask(false);
+    @Inject(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;drawDirect()V", shift = At.Shift.AFTER))
+    private void drawBG(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
-        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1);
+        float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
+        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, new Color(color[0], color[1], color[2], color[3]), entityIn);
+        GlStateManager.enableDepth();
+        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, entityIn);
+        GlStateManager.depthMask(true);
     }
 }

@@ -8,6 +8,7 @@
   },
   "client": [
     "FontRendererAccessor",
+    "RenderAccessor",
     "RendererLivingEntityMixin",
     "RenderMixin",
     "essential.OnlineIndicatorMixin",

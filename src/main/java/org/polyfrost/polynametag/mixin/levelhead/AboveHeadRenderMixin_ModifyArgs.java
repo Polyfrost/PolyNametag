@@ -39,25 +39,7 @@ public abstract class AboveHeadRenderMixin_ModifyArgs {
     @ModifyArgs(method = "renderName", remap = false, at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;color(FFFF)Lgg/essential/universal/UGraphics;"))
     private void polyNametag$changeBackgroundColor(Args args) {
         if (!ModConfig.INSTANCE.enabled) return;
-        float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
-        args.set(0, color[0]);
-        args.set(1, color[1]);
-        args.set(2, color[2]);
-        args.set(3, color[3]);
+        args.set(3, 0f);
     }
 
-    @Dynamic("LevelHead")
-    @ModifyArg(
-        method = "renderName",
-        remap = false,
-        at = @At(
-            value = "INVOKE",
-            target = "Lgg/essential/universal/UGraphics;pos(DDD)Lgg/essential/universal/UGraphics;"
-        ),
-        index = 2
-    )
-    private double polyNametag$modifyBackgroundZ(double z) {
-        if (!ModConfig.INSTANCE.enabled) return z;
-        return z + 0.01;
-    }
 }

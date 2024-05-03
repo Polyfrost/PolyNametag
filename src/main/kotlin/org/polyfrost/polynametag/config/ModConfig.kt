@@ -24,6 +24,21 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     var scale = 1f
         get() = field.coerceIn(0f, 1f)
 
+    @Switch(name = "Rounded Corners")
+    var rounded = false
+
+    @Slider(name = "Corner Radius", min = 0f, max = 10f)
+    var cornerRadius = 0f
+        get() = field.coerceIn(0f, 10f)
+
+    @Slider(name = "Padding X", min = 0f, max = 10f)
+    var paddingX = 0f
+        get() = field.coerceIn(0f, 10f)
+
+    @Slider(name = "Padding Y", min = 0f, max = 10f)
+    var paddingY = 0f
+        get() = field.coerceIn(0f, 10f)
+
     @Dropdown(name = "Text Type", options = ["No Shadow", "Shadow", "Full Shadow"], description = "The type of shadow to render")
     var textType = 0
 
@@ -36,6 +51,9 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     @Switch(name = "Show own nametag", description = "Whether to show your own nametag")
     var showOwnNametag = true
 
+    @Switch(name = "Offset Essential Indicator", description = "Offset nametag to center if the player has essential indicator drawn")
+    var essentialOffset = false
+
     @Switch(name = "Background", description = "Whether to render a background behind the nametag")
     var background = true
 
@@ -44,7 +62,7 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
 
     @CustomOption
     @Transient
-    private val nametagPreview = NametagPreview(category = "General")
+    val nametagPreview = NametagPreview(category = "General")
 
     init {
         initialize()
@@ -55,6 +73,8 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
         addDependency("showOwnNametag", "Patcher's Show Own Nametag. Please turn it off to use this feature.") {
             !PolyNametag.isPatcher || !PatcherConfig.showOwnNametag
         }
+        addDependency("cornerRadius", "rounded")
+        hideIf("essentialOffset") { !PolyNametag.isEssential }
     }
 
     override fun getCustomOption(
