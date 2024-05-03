@@ -95,12 +95,8 @@ repositories {
 
 // Configures the libraries/dependencies for your mod.
 dependencies {
-    implementation(files("libs/Essential.jar"))
-    implementation(files("libs/LevelHead.jar"))
     // Adds the OneConfig library, so we can develop with it.
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.1-alpha+")
-
-    shade("gg.essential:universalcraft-$platform:335")
 
     val loaderPlatform = when {
         platform.isFabric -> "fabric"

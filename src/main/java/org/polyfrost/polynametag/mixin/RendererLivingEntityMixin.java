@@ -61,6 +61,11 @@ public abstract class RendererLivingEntityMixin  {
         return (!PolyNametag.INSTANCE.isPatcher() && ModConfig.INSTANCE.enabled && Minecraft.getMinecraft().gameSettings.thirdPersonView == 2) ? -x : x;
     }
 
+    @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;pushMatrix()V"))
+    private void cancelEssential(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
+        PolyNametag.INSTANCE.setDrawEssential(false);
+    }
+
     @Inject(
         method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V",
         at = @At(
