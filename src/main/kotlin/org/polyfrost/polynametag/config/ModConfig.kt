@@ -52,7 +52,7 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     var showOwnNametag = true
 
     @Switch(name = "Offset Essential Indicator", description = "Offset nametag to center if the player has essential indicator drawn")
-    var essentialOffset = false
+    var essentialOffset = true
 
     @Switch(name = "Background", description = "Whether to render a background behind the nametag")
     var background = true
