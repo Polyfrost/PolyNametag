@@ -8,6 +8,7 @@
   },
   "client": [
     "FontRendererAccessor",
+    "GuiInventoryMixin",
     "RenderAccessor",
     "RendererLivingEntityMixin",
     "RenderMixin",

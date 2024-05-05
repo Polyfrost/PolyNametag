@@ -81,7 +81,7 @@ fun drawBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
         val x = points[a].x * width
         val y = points[a].y * (4.5 + ModConfig.paddingY - radius)
         if (ModConfig.rounded) {
-            for (b in 0..89 / quality) {
+            for (b in 0 until 90 / quality) {
                 val radian = Math.toRadians((a * 90 + b * quality).toDouble())
                 GL11.glVertex2d(x + sin(radian) * radius, y + cos(radian) * radius)
             }

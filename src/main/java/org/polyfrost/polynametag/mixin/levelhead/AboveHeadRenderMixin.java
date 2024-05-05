@@ -30,6 +30,7 @@ public abstract class AboveHeadRenderMixin {
     @Dynamic("LevelHead")
     @Inject(method = "renderName", at = @At("HEAD"))
     private void move(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
+        if (ModConfig.INSTANCE.enabled) return;
         PolyNametag.INSTANCE.setDrawEssential(false);
     }
 
@@ -63,6 +64,7 @@ public abstract class AboveHeadRenderMixin {
     @Dynamic("LevelHead")
     @Inject(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;drawDirect()V", shift = At.Shift.AFTER))
     private void drawBG(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
+        if (ModConfig.INSTANCE.enabled) return;
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
         float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
         NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, new Color(color[0], color[1], color[2], color[3]), entityIn);

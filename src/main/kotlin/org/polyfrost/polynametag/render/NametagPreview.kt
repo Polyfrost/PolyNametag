@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.opengl.GL11
+import org.polyfrost.polynametag.PolyNametag
 import kotlin.math.atan
 import net.minecraft.client.renderer.GlStateManager as GL
 
@@ -103,9 +104,11 @@ class NametagPreview(
         renderManager.playerViewY = 180f
         renderManager.isRenderShadow = false
         val renderer = renderManager.getEntityRenderObject<EntityLivingBase>(entity) as RendererLivingEntity
+        PolyNametag.drawingInGUI = true
         drawing = true
         renderer.renderName(entity, 0.0, 0.0, 0.0)
         drawing = false
+        PolyNametag.drawingInGUI = false
         entity.riddenByEntity = entity // cancel original nametag
         renderManager.doRenderEntity(entity, 0.0, 0.0, 0.0, 0f, 1f, true)
         renderManager.isRenderShadow = true

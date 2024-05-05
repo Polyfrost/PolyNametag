@@ -1,13 +1,11 @@
 package org.polyfrost.polynametag
 
-import club.sk1er.mods.levelhead.display.LevelheadTag
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.entity.Render
 import net.minecraft.client.renderer.entity.RendererLivingEntity
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Loader
@@ -48,10 +46,13 @@ object PolyNametag {
     var names: MutableList<NameInfo> = ArrayList()
 
     var drawing = false
+    var drawingInGUI = false
     var drawEssential = false
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
+        if (!ModConfig.enabled) return
+        if (names.isEmpty() && labels.isEmpty()) return
         GlStateManager.pushMatrix()
         drawing = true
         for (i in names) {
