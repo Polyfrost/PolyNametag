@@ -63,7 +63,7 @@ public abstract class RendererLivingEntityMixin  {
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;pushMatrix()V"))
     private void cancelEssential(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.enabled) return;
         PolyNametag.INSTANCE.setDrawEssential(false);
     }
 
@@ -82,13 +82,13 @@ public abstract class RendererLivingEntityMixin  {
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()V"))
     private void cancel(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.enabled) return;
         Tessellator.getInstance().getWorldRenderer().reset();
     }
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()V", shift = At.Shift.AFTER))
     private void drawBG(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.enabled) return;
         float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
         drawFrontBackground(entity.getDisplayName().getFormattedText(), new Color(color[0], color[1], color[2], color[3]), entity);
     }
@@ -107,7 +107,7 @@ public abstract class RendererLivingEntityMixin  {
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At("HEAD"), cancellable = true)
     private void move(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.enabled) return;
         if (!PolyNametag.INSTANCE.getDrawing() && !PolyNametag.INSTANCE.getDrawingInGUI()) {
             PolyNametag.INSTANCE.getNames().add(new PolyNametag.NameInfo((RendererLivingEntity<EntityLivingBase>) (Object) this, entity, x, y, z));
             ci.cancel();
