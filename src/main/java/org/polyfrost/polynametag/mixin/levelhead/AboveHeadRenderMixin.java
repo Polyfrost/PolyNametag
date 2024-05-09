@@ -31,11 +31,11 @@ public abstract class AboveHeadRenderMixin {
         PolyNametag.INSTANCE.setDrawEssential(false);
     }
 
-    @Dynamic("LevelHead")
-    @ModifyVariable(method = "renderName", at = @At("STORE"), name = "xMultiplier")
-    private int stupid(int value) {
-        return PolyNametag.INSTANCE.isPatcher() ? 1 : value;
-    }
+    //@Dynamic("LevelHead")
+    //@ModifyVariable(method = "renderName", at = @At("STORE"), name = "xMultiplier")
+    //private int stupid(int value) {
+    //    return PolyNametag.INSTANCE.isPatcher() ? 1 : value;
+    //}
 
     @Dynamic("LevelHead")
     @Redirect(
