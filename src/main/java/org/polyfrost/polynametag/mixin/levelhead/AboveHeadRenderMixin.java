@@ -11,10 +11,7 @@ import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.awt.*;
@@ -30,8 +27,14 @@ public abstract class AboveHeadRenderMixin {
     @Dynamic("LevelHead")
     @Inject(method = "renderName", at = @At("HEAD"))
     private void move(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.enabled) return;
         PolyNametag.INSTANCE.setDrawEssential(false);
+    }
+
+    @Dynamic("LevelHead")
+    @ModifyVariable(method = "renderName", at = @At("STORE"), name = "xMultiplier")
+    private int stupid(int value) {
+        return PolyNametag.INSTANCE.isPatcher() ? 1 : value;
     }
 
     @Dynamic("LevelHead")
@@ -64,7 +67,7 @@ public abstract class AboveHeadRenderMixin {
     @Dynamic("LevelHead")
     @Inject(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;drawDirect()V", shift = At.Shift.AFTER))
     private void drawBG(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.enabled) return;
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
         float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
         NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, new Color(color[0], color[1], color[2], color[3]), entityIn);

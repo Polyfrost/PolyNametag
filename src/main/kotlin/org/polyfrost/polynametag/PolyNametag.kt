@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.entity.Render
 import net.minecraft.client.renderer.entity.RendererLivingEntity
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
-import net.minecraftforge.client.event.RenderWorldEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Loader
@@ -47,17 +46,11 @@ object PolyNametag {
     var names: MutableList<NameInfo> = ArrayList()
 
     var drawing = false
-    var drawingInGUI = false
+    var drawingWorld = false
     var drawEssential = false
 
     @SubscribeEvent
-    fun startWorld(event: RenderWorldEvent.Pre) {
-        drawingInGUI = false
-    }
-
-    @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        drawingInGUI = true
         if (!ModConfig.enabled) return
         if (names.isEmpty() && labels.isEmpty()) return
         GlStateManager.pushMatrix()

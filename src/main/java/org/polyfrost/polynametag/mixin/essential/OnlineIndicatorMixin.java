@@ -36,7 +36,7 @@ public class OnlineIndicatorMixin {
     @Dynamic("Essential")
     @Inject(method = "drawNametagIndicator", at = @At("HEAD"), cancellable = true)
     private static void skip(UMatrixStack matrixStack, Entity entity, String str, int light, CallbackInfo ci) {
-        if (ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.enabled) return;
         if (!PolyNametag.INSTANCE.getDrawingEssential()) ci.cancel();
     }
 
@@ -51,7 +51,7 @@ public class OnlineIndicatorMixin {
         index = 3
     )
     private static double polyNametag$modifyBackgroundZ(double z) {
-        if (ModConfig.INSTANCE.enabled) return z;
+        if (!ModConfig.INSTANCE.enabled) return z;
         if (!NametagRenderingKt.shouldDrawBackground()) return z;
         return z + 0.01;
     }
