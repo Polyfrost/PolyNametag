@@ -12,11 +12,11 @@ public class EntityRendererMixin {
 
     @Inject(method = "renderWorld", at = @At("HEAD"))
     private void start(float partialTicks, long finishTimeNano, CallbackInfo ci) {
-        PolyNametag.INSTANCE.setDrawingWorld(false);
+        PolyNametag.INSTANCE.setDrawingWorld(true);
     }
 
     @Inject(method = "renderWorld", at = @At("TAIL"))
     private void end(float partialTicks, long finishTimeNano, CallbackInfo ci) {
-        PolyNametag.INSTANCE.setDrawingWorld(true);
+        PolyNametag.INSTANCE.setDrawingWorld(false);
     }
 }

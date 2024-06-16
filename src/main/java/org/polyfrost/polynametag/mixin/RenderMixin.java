@@ -94,7 +94,7 @@ public abstract class RenderMixin {
     @Inject(method = "renderLivingLabel", at = @At("HEAD"), cancellable = true)
     private void move(Entity entityIn, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
-        if (!PolyNametag.INSTANCE.getDrawing() && !PolyNametag.INSTANCE.getDrawingWorld()) {
+        if (!PolyNametag.INSTANCE.getDrawing() && PolyNametag.INSTANCE.getDrawingWorld()) {
             PolyNametag.INSTANCE.getLabels().add(new PolyNametag.LabelInfo((Render<Entity>) (Object) this, entityIn, str, x, y, z, maxDistance));
             ci.cancel();
         }
