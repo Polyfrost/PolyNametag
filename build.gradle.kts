@@ -23,11 +23,6 @@ val mod_version: String by project
 val mod_id: String by project
 val mod_archives_name: String by project
 
-// Sets up the variables for when we preprocess to other Minecraft versions.
-preprocess {
-    vars.put("MODERN", if (project.platform.mcMinor >= 16) 1 else 0)
-}
-
 // Replaces the variables in `ExampleMod.java` to the ones specified in `gradle.properties`.
 blossom {
     replaceToken("@VER@", mod_version)
@@ -95,14 +90,14 @@ repositories {
 // Configures the libraries/dependencies for your mod.
 dependencies {
     // Adds the OneConfig library, so we can develop with it.
-    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.1-alpha+")
+    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
 
     val loaderPlatform = when {
         platform.isFabric -> "fabric"
         platform.isLegacyForge -> "forge-legacy"
         else -> "forge-latest"
     }
-    modRuntimeOnly("me.djtheredstoner:DevAuth-$loaderPlatform:1.1.2")
+    modRuntimeOnly("me.djtheredstoner:DevAuth-$loaderPlatform:1.2.0")
     // If we are building for legacy forge, includes the launch wrapper with `shade` as we configured earlier.
     if (platform.isLegacyForge) {
         compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
