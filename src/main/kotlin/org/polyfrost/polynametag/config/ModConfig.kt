@@ -9,6 +9,8 @@ import cc.polyfrost.oneconfig.config.data.Mod
 import cc.polyfrost.oneconfig.config.data.ModType
 import cc.polyfrost.oneconfig.config.elements.BasicOption
 import cc.polyfrost.oneconfig.config.elements.OptionPage
+import cc.polyfrost.oneconfig.utils.Notifications
+import club.sk1er.patcher.config.OldPatcherConfig
 import club.sk1er.patcher.config.PatcherConfig
 import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.render.NametagPreview
@@ -64,6 +66,8 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     @Transient
     val nametagPreview = NametagPreview(category = "General")
 
+    var hasMigratedPatcher = false
+
     init {
         initialize()
         addDependency("backgroundColor", "background")
@@ -75,6 +79,34 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
         }
         addDependency("cornerRadius", "rounded")
         hideIf("essentialOffset") { !PolyNametag.isEssential }
+
+        if (PolyNametag.isPatcher && !hasMigratedPatcher) {
+            try {
+                Class.forName("club.sk1er.patcher.config.OldPatcherConfig")
+                var didAnything = false
+                if (OldPatcherConfig.shadowedNametagText) {
+                    textType = 1
+                    didAnything = true
+                }
+                if (OldPatcherConfig.disableNametagBoxes) {
+                    background = false
+                    didAnything = true
+                }
+                if (OldPatcherConfig.showOwnNametag) {
+                    showOwnNametag = true
+                    didAnything = true
+                }
+
+                hasMigratedPatcher = true
+                save()
+
+                if (didAnything) {
+                    Notifications.INSTANCE.send("PolyNametag", "Migrated Patcher settings replaced by PolyNametag. Please check PolyNametag's settings to make sure they are correct.")
+                }
+            } catch (_: ClassNotFoundException) {
+
+            }
+        }
     }
 
     override fun getCustomOption(
