@@ -35,7 +35,7 @@ object PolyNametag {
 
     @Mod.EventHandler
     fun onPostInit(event: FMLPostInitializationEvent) {
-        isEssential = Loader.isModLoaded("essential")
+        isEssential = Loader.isModLoaded("essential") && !Loader.isModLoaded("notsoessential")
         isPatcher = Loader.isModLoaded("patcher")
     }
 
