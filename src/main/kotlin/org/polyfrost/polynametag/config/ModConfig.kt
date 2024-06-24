@@ -80,7 +80,7 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
         addDependency("cornerRadius", "rounded")
         hideIf("essentialOffset") { !PolyNametag.isEssential }
 
-        if (PolyNametag.isPatcher && !hasMigratedPatcher) {
+        if (!hasMigratedPatcher) {
             try {
                 Class.forName("club.sk1er.patcher.config.OldPatcherConfig")
                 var didAnything = false
