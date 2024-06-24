@@ -121,6 +121,7 @@ fun FontRenderer.drawBorderedText(text: String, x: Float, y: Float, opacity: Int
 }
 
 fun drawIndicator(entity: Entity, string: String) {
+    if (entity !is EntityPlayer) return
     OnlineIndicator.drawNametagIndicator(UMatrixStack(), entity, string, 0)
 }
 
