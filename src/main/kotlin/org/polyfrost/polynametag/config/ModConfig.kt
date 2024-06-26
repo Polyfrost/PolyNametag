@@ -53,14 +53,17 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
     @Switch(name = "Show own nametag", description = "Whether to show your own nametag")
     var showOwnNametag = true
 
-    @Switch(name = "Offset Essential Indicator", description = "Offset nametag to center if the player has essential indicator drawn")
-    var essentialOffset = true
+    @Switch(name = "Show in inventory")
+    var showInInventory = false
 
     @Switch(name = "Background", description = "Whether to render a background behind the nametag")
     var background = true
 
     @Color(name = "Background color", description = "The color of the background")
     var backgroundColor = OneColor(0, 0, 0, 63)
+
+    @Switch(name = "Offset Essential Indicator", description = "Offset nametag to center if the player has essential indicator drawn")
+    var essentialOffset = true
 
     @CustomOption
     @Transient
@@ -78,6 +81,7 @@ object ModConfig : Config(Mod("Nametags", ModType.UTIL_QOL, "/polynametag.svg"),
             !PolyNametag.isPatcher || !PatcherConfig.showOwnNametag
         }
         addDependency("cornerRadius", "rounded")
+        addDependency("showInInventory", "showOwnNametag")
         hideIf("essentialOffset") { !PolyNametag.isEssential }
 
         if (!hasMigratedPatcher) {

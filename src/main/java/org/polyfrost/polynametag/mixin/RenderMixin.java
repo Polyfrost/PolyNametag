@@ -95,7 +95,7 @@ public abstract class RenderMixin {
     private void move(Entity entityIn, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
         if (!PolyNametag.INSTANCE.getDrawing() && PolyNametag.INSTANCE.getDrawingWorld()) {
-            PolyNametag.INSTANCE.getLabels().add(new PolyNametag.LabelInfo((Render<Entity>) (Object) this, entityIn, str, x, y, z, maxDistance));
+            PolyNametag.INSTANCE.getNametags().add(new PolyNametag.LabelInfo((Render<Entity>) (Object) this, entityIn, str, x, y, z, maxDistance));
             ci.cancel();
         }
     }
@@ -120,6 +120,7 @@ public abstract class RenderMixin {
             PolyNametag.INSTANCE.setDrawingEssential(true);
             NametagRenderingKt.drawIndicator(entityIn, str);
             PolyNametag.INSTANCE.setDrawingEssential(false);
+            instance.setDrawEssential(false);
         }
     }
 

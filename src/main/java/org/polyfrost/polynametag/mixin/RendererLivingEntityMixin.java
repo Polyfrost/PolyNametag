@@ -30,7 +30,7 @@ public abstract class RendererLivingEntityMixin  {
         )
     )
     private Entity polyNametag$cancelSelfCheck(RenderManager renderManager) {
-        boolean shouldShowOwnNametag = ((ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag() && (!PolyNametag.INSTANCE.getDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) || ModConfig.INSTANCE.getNametagPreview().getDrawing());
+        boolean shouldShowOwnNametag = ((ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag() && (ModConfig.INSTANCE.getShowInInventory() || !PolyNametag.INSTANCE.getDrawingInventory()) && (!PolyNametag.INSTANCE.getDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) || ModConfig.INSTANCE.getNametagPreview().getDrawing());
         return shouldShowOwnNametag ? null : renderManager.livingPlayer;
     }
 
@@ -109,7 +109,7 @@ public abstract class RendererLivingEntityMixin  {
     private void move(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
         if (!PolyNametag.INSTANCE.getDrawing() && PolyNametag.INSTANCE.getDrawingWorld()) {
-            PolyNametag.INSTANCE.getNames().add(new PolyNametag.NameInfo((RendererLivingEntity<EntityLivingBase>) (Object) this, entity, x, y, z));
+            PolyNametag.INSTANCE.getNametags().add(new PolyNametag.NameInfo((RendererLivingEntity<EntityLivingBase>) (Object) this, entity, x, y, z));
             ci.cancel();
         }
     }

@@ -10,6 +10,7 @@
     "EntityRendererMixin",
     "FontRendererAccessor",
     "GuiInventoryMixin",
+    "MinecraftAccessor",
     "RenderAccessor",
     "RendererLivingEntityMixin",
     "RenderMixin",
