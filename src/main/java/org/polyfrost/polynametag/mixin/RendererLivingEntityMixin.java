@@ -12,6 +12,7 @@ import org.polyfrost.polynametag.PolyNametag;
 import org.polyfrost.polynametag.config.ModConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -22,6 +23,18 @@ import static org.polyfrost.polynametag.render.NametagRenderingKt.drawFrontBackg
 @Mixin(value = RendererLivingEntity.class, priority = 1001)
 public abstract class RendererLivingEntityMixin  {
 
+    @Unique
+    private boolean shouldShowOwnNametag;
+
+    @Redirect(
+            method = "canRenderName(Lnet/minecraft/entity/EntityLivingBase;)Z",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isGuiEnabled()Z")
+    )
+    private boolean gui() {
+        shouldShowOwnNametag = ((ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag() && (ModConfig.INSTANCE.getShowInInventory() || !PolyNametag.INSTANCE.getDrawingInventory()) && (!PolyNametag.INSTANCE.getDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) || ModConfig.INSTANCE.getNametagPreview().getDrawing());
+        return shouldShowOwnNametag || Minecraft.isGuiEnabled();
+    }
+
     @Redirect(
         method = "canRenderName(Lnet/minecraft/entity/EntityLivingBase;)Z",
         at = @At(
@@ -30,7 +43,6 @@ public abstract class RendererLivingEntityMixin  {
         )
     )
     private Entity polyNametag$cancelSelfCheck(RenderManager renderManager) {
-        boolean shouldShowOwnNametag = ((ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag() && (ModConfig.INSTANCE.getShowInInventory() || !PolyNametag.INSTANCE.getDrawingInventory()) && (!PolyNametag.INSTANCE.getDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) || ModConfig.INSTANCE.getNametagPreview().getDrawing());
         return shouldShowOwnNametag ? null : renderManager.livingPlayer;
     }
 

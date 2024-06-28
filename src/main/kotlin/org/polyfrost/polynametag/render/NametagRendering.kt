@@ -1,5 +1,7 @@
 package org.polyfrost.polynametag.render
 
+import cc.polyfrost.oneconfig.renderer.TextRenderer
+import cc.polyfrost.oneconfig.utils.dsl.getAlpha
 import cc.polyfrost.oneconfig.utils.dsl.mc
 import club.sk1er.patcher.config.PatcherConfig
 import gg.essential.Essential
@@ -17,11 +19,10 @@ import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
 import java.awt.Color
-import java.util.regex.Pattern
 import kotlin.math.cos
-import kotlin.math.max
 import kotlin.math.sin
-import net.minecraft.client.renderer.GlStateManager as GL
+
+var drawingText = false
 
 internal fun shouldDrawBackground() =
     ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
@@ -98,28 +99,6 @@ fun drawBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
     GL11.glDisable(GL11.GL_LINE_SMOOTH)
 }
 
-private val regex = Pattern.compile("(?i)\u00A7[0-9a-f]")
-var isDrawingBorder = false
-fun FontRenderer.drawBorderedText(text: String, x: Float, y: Float, opacity: Int): Int {
-    if (this !is FontRendererAccessor) return -1
-    val noColors = regex.matcher(text).replaceAll("\u00A7r")
-    var yes = 0
-    if (opacity / 4 > 3) {
-        for (xOff in -2..2) {
-            for (yOff in -2..2) {
-                if (xOff * xOff != yOff * yOff) {
-                    yes = max(
-                        invokeRenderString(
-                            noColors, xOff / 2f + x, yOff / 2f + y, opacity / 4 shl 24, false
-                        ), yes
-                    )
-                }
-            }
-        }
-    }
-    return yes
-}
-
 fun drawIndicator(entity: Entity, string: String) {
     if (entity !is EntityPlayer) return
     OnlineIndicator.drawNametagIndicator(UMatrixStack(), entity, string, 0)
@@ -135,45 +114,18 @@ fun Entity.canDrawIndicator(): Boolean {
     return false
 }
 
-internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Int, y: Float, color: Int): Int {
-    if (this !is FontRendererAccessor) return -1
-    GL.pushMatrix()
-    GL.translate(0f, 0f, -0.01f)
-
-    when (ModConfig.textType) {
-        0 -> {
-            val i = drawString(text, x.toFloat(), y, color, false)
-            GL.popMatrix()
-            return i
-        }
-
-        1 -> {
-            GL.enableAlpha()
-            invokeResetStyles()
-
-            val shadowX = invokeRenderString(text, x + 1f, y + 1f, color, true)
-            GL.translate(0f, 0f, -0.01f)
-            val normalX = drawString(text, x.toFloat(), y, color, false)
-            GL.popMatrix()
-
-            return max(shadowX, normalX)
-        }
-
-        2 -> {
-            GL.enableAlpha()
-            invokeResetStyles()
-
-            isDrawingBorder = true
-
-            val shadowX = drawBorderedText(text, x.toFloat(), y, 255)
-            GL.translate(0f, 0f, -0.01f)
-            val normalX = drawString(text, x.toFloat(), y, color, false)
-
-            isDrawingBorder = false
-            GL.popMatrix()
-
-            return max(shadowX, normalX)
-        }
+internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
+    if (this !is FontRendererAccessor) return 0
+    GlStateManager.pushMatrix()
+    GlStateManager.translate(0f, 0f, -0.01f)
+    drawingText = true
+    return when (ModConfig.textType) {
+        0 -> drawString(text, x, y, color, false)
+        1 -> drawString(text, x, y, color, true)
+        2 -> TextRenderer.drawBorderedText(text, x, y, color, color.getAlpha())
+        else -> 0
+    }.apply {
+        drawingText = false
+        GlStateManager.popMatrix()
     }
-    return -1
 }
