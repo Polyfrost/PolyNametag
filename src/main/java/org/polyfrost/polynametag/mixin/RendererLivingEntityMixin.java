@@ -16,8 +16,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.awt.*;
-
 import static org.polyfrost.polynametag.render.NametagRenderingKt.drawFrontBackground;
 
 @Mixin(value = RendererLivingEntity.class, priority = 1001)
@@ -73,12 +71,6 @@ public abstract class RendererLivingEntityMixin  {
         return (!PolyNametag.INSTANCE.isPatcher() && ModConfig.INSTANCE.enabled && Minecraft.getMinecraft().gameSettings.thirdPersonView == 2) ? -x : x;
     }
 
-    @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;pushMatrix()V"))
-    private void cancelEssential(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
-        PolyNametag.INSTANCE.setDrawEssential(false);
-    }
-
     @Inject(
         method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V",
         at = @At(
@@ -101,8 +93,8 @@ public abstract class RendererLivingEntityMixin  {
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()V", shift = At.Shift.AFTER))
     private void drawBG(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
-        float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
-        drawFrontBackground(entity.getDisplayName().getFormattedText(), new Color(color[0], color[1], color[2], color[3]), entity);
+        if (PolyNametag.INSTANCE.getShouldDrawIndicator() && ModConfig.INSTANCE.getEssentialOffset()) GlStateManager.translate(5f, 0f, 0f);
+        drawFrontBackground(entity.getDisplayName().getFormattedText(), NametagRenderingKt.getBackBackgroundGLColorOrEmpty(), entity);
     }
 
     @Redirect(
@@ -120,9 +112,20 @@ public abstract class RendererLivingEntityMixin  {
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At("HEAD"), cancellable = true)
     private void move(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
-        if (!PolyNametag.INSTANCE.getDrawing() && PolyNametag.INSTANCE.getDrawingWorld()) {
+        PolyNametag.INSTANCE.setShouldDrawIndicator(NametagRenderingKt.canDrawIndicator(entity));
+        if (!PolyNametag.INSTANCE.getDrawingTags() && PolyNametag.INSTANCE.getDrawingWorld()) {
             PolyNametag.INSTANCE.getNametags().add(new PolyNametag.NameInfo((RendererLivingEntity<EntityLivingBase>) (Object) this, entity, x, y, z));
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;enableLighting()V"))
+    private void essential(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
+        if (!ModConfig.INSTANCE.enabled) return;
+        PolyNametag instance = PolyNametag.INSTANCE;
+        if (instance.isEssential() && instance.getShouldDrawIndicator()) {
+            NametagRenderingKt.drawIndicator(entity, entity.getDisplayName().getFormattedText());
+            instance.setShouldDrawIndicator(false);
         }
     }
 }

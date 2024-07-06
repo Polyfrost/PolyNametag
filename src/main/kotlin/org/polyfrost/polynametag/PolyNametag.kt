@@ -15,7 +15,6 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.MinecraftAccessor
 import org.polyfrost.polynametag.mixin.RenderAccessor
-import org.polyfrost.polynametag.render.canDrawIndicator
 
 @Mod(modid = PolyNametag.MODID, name = PolyNametag.NAME, version = PolyNametag.VERSION, modLanguageAdapter = "cc.polyfrost.oneconfig.utils.KotlinLanguageAdapter")
 object PolyNametag {
@@ -25,7 +24,7 @@ object PolyNametag {
     var isPatcher = false
         private set
     var isEssential = false
-    var drawingEssential = false
+    var drawingIndicator = false
 
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {
@@ -44,16 +43,16 @@ object PolyNametag {
 
     var nametags = ArrayList<Any>()
 
-    var drawing = false
+    var drawingTags = false
     var drawingWorld = false
     var drawingInventory = false
-    var drawEssential = false
+    var shouldDrawIndicator = false
 
     fun onRender() {
         if (!ModConfig.enabled) return
         if (nametags.isEmpty()) return
         GlStateManager.pushMatrix()
-        drawing = true
+        drawingTags = true
         mc.entityRenderer.enableLightmap()
         val partialTicks = (mc as MinecraftAccessor).timer.renderPartialTicks
         for (name in nametags) {
@@ -69,15 +68,13 @@ object PolyNametag {
                     val j = i % 65536
                     val k = i / 65536
                     OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j.toFloat() / 1.0f, k.toFloat() / 1.0f)
-                    drawEssential = entity.canDrawIndicator()
                     instance.renderName(entity, x, y, z)
-                    drawEssential = false
                 }
             }
 
         }
         nametags.clear()
-        drawing = false
+        drawingTags = false
         mc.entityRenderer.disableLightmap()
         GlStateManager.popMatrix()
     }

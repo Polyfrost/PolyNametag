@@ -37,7 +37,7 @@ public class OnlineIndicatorMixin {
     @Inject(method = "drawNametagIndicator", at = @At("HEAD"), cancellable = true)
     private static void skip(UMatrixStack matrixStack, Entity entity, String str, int light, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
-        if (!PolyNametag.INSTANCE.getDrawingEssential()) ci.cancel();
+        if (!PolyNametag.INSTANCE.getDrawingIndicator()) ci.cancel();
     }
 
     @Dynamic("Essential")

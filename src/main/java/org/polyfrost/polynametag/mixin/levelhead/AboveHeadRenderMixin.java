@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
-import org.polyfrost.polynametag.PolyNametag;
 import org.polyfrost.polynametag.config.ModConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
@@ -23,13 +22,6 @@ import java.awt.*;
 @Pseudo
 @Mixin(targets = "club.sk1er.mods.levelhead.render.AboveHeadRender", priority = 1001, remap = false)
 public abstract class AboveHeadRenderMixin {
-
-    @Dynamic("LevelHead")
-    @Inject(method = "renderName", at = @At("HEAD"))
-    private void move(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
-        PolyNametag.INSTANCE.setDrawEssential(false);
-    }
 
     //@Dynamic("LevelHead")
     //@ModifyVariable(method = "renderName", at = @At("STORE"), name = "xMultiplier")
@@ -69,8 +61,7 @@ public abstract class AboveHeadRenderMixin {
     private void drawBG(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
-        float[] color = NametagRenderingKt.getBackBackgroundGLColorOrEmpty();
-        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, new Color(color[0], color[1], color[2], color[3]), entityIn);
+        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, NametagRenderingKt.getBackBackgroundGLColorOrEmpty(), entityIn);
         GlStateManager.enableDepth();
         NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, entityIn);
         GlStateManager.depthMask(true);

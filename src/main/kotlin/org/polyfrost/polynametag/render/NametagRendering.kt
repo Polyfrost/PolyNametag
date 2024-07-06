@@ -16,6 +16,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import org.lwjgl.opengl.GL11
 import org.polyfrost.polynametag.PolyNametag
+import org.polyfrost.polynametag.PolyNametag.drawingIndicator
 import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
 import java.awt.Color
@@ -27,12 +28,12 @@ var drawingText = false
 internal fun shouldDrawBackground() =
     ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
 
-val NO_COLOR_FLOAT = floatArrayOf(0f, 0f, 0f, 0f)
-fun getBackBackgroundGLColorOrEmpty(): FloatArray =
+val NO_COLOR = Color(0f, 0f, 0f, 0f)
+fun getBackBackgroundGLColorOrEmpty(): Color =
     if (shouldDrawBackground()) with(ModConfig.backgroundColor) {
-        floatArrayOf(red / 255f, green / 255f, blue / 255f, alpha.coerceAtMost(0x3F) / 255f)
+        Color(red, green, blue, alpha.coerceAtMost(0x3F))
     } else {
-        NO_COLOR_FLOAT
+        NO_COLOR
     }
 
 fun drawFrontBackground(text: String, entity: Entity) {
@@ -60,7 +61,7 @@ fun drawFrontBackground(xStart: Double, xEnd: Double, entity: Entity) {
 fun drawBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
     if (!ModConfig.enabled) return
     if (!shouldDrawBackground()) return
-    val realStart = xStart - if (PolyNametag.drawEssential) 10 else 0
+    val realStart = xStart - if (PolyNametag.shouldDrawIndicator) 10 else 0
     GL11.glEnable(GL11.GL_LINE_SMOOTH)
     GlStateManager.disableTexture2D()
     GL11.glPushMatrix()
@@ -101,7 +102,9 @@ fun drawBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
 
 fun drawIndicator(entity: Entity, string: String) {
     if (entity !is EntityPlayer) return
+    drawingIndicator = true
     OnlineIndicator.drawNametagIndicator(UMatrixStack(), entity, string, 0)
+    drawingIndicator = false
 }
 
 fun Entity.canDrawIndicator(): Boolean {

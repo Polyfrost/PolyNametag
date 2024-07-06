@@ -13,7 +13,6 @@ import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.opengl.GL11
-import org.polyfrost.polynametag.PolyNametag
 import kotlin.math.atan
 import net.minecraft.client.renderer.GlStateManager as GL
 
