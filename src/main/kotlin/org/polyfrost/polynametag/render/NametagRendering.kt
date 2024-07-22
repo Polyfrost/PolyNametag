@@ -25,13 +25,15 @@ import kotlin.math.sin
 
 var drawingText = false
 
+var drawingWithDepth = false
+
 internal fun shouldDrawBackground() =
     ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
 
 val NO_COLOR = Color(0f, 0f, 0f, 0f)
 fun getBackBackgroundGLColorOrEmpty(): Color =
     if (shouldDrawBackground()) with(ModConfig.backgroundColor) {
-        Color(red, green, blue, alpha.coerceAtMost(0x3F))
+        Color(red, green, blue, alpha.coerceAtMost(63))
     } else {
         NO_COLOR
     }
@@ -68,12 +70,17 @@ fun drawBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
     GL11.glTranslated((realStart + xEnd) / 2f, 3.5, 0.01)
     GL11.glBegin(GL11.GL_TRIANGLE_FAN)
     with(color) {
-        GL11.glColor4f(red / 255f, green / 255f, blue / 255f, alpha / 255f)
+        val a = alpha.coerceAtMost(63)
+        val realAlpha = if (drawingWithDepth) (alpha - a) / (255 - a).toFloat() else alpha / 255f
+        GL11.glColor4f(red / 255f, green / 255f, blue / 255f, realAlpha)
     }
+    drawingWithDepth = false
 
-    val radius = if (ModConfig.rounded) ModConfig.cornerRadius.coerceAtMost(4.5f + ModConfig.paddingY) else 0f
+    val halfWidth = (xEnd - realStart) / 2f + ModConfig.paddingX
 
-    val width = (xEnd - realStart) / 2f + ModConfig.paddingX - radius
+    val radius = if (ModConfig.rounded) ModConfig.cornerRadius.coerceAtMost(4.5f + ModConfig.paddingY).coerceAtMost(halfWidth.toFloat()) else 0f
+
+    val width = halfWidth - radius
 
     val distanceFromPlayer = entity.getDistanceToEntity(mc.thePlayer)
     val quality = ((distanceFromPlayer * 4 + 10).coerceAtMost(350f) / 4).toInt()

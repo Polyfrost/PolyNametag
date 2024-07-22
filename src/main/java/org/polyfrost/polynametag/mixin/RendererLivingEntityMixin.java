@@ -16,8 +16,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static org.polyfrost.polynametag.render.NametagRenderingKt.drawFrontBackground;
-
 @Mixin(value = RendererLivingEntity.class, priority = 1001)
 public abstract class RendererLivingEntityMixin  {
 
@@ -94,7 +92,7 @@ public abstract class RendererLivingEntityMixin  {
     private void drawBG(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
         if (PolyNametag.INSTANCE.getShouldDrawIndicator() && ModConfig.INSTANCE.getEssentialOffset()) GlStateManager.translate(5f, 0f, 0f);
-        drawFrontBackground(entity.getDisplayName().getFormattedText(), NametagRenderingKt.getBackBackgroundGLColorOrEmpty(), entity);
+        NametagRenderingKt.drawFrontBackground(entity.getDisplayName().getFormattedText(), NametagRenderingKt.getBackBackgroundGLColorOrEmpty(), entity);
     }
 
     @Redirect(

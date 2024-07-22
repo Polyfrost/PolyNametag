@@ -73,6 +73,7 @@ public abstract class RenderMixin {
     )
     private void polyNametag$drawBackground(Entity entity, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
+        NametagRenderingKt.setDrawingWithDepth(true);
         NametagRenderingKt.drawFrontBackground(str, entity);
     }
 
