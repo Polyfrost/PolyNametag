@@ -92,7 +92,7 @@ public abstract class RendererLivingEntityMixin  {
     private void drawBG(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
         if (PolyNametag.INSTANCE.getShouldDrawIndicator() && ModConfig.INSTANCE.getEssentialOffset()) GlStateManager.translate(5f, 0f, 0f);
-        NametagRenderingKt.drawFrontBackground(entity.getDisplayName().getFormattedText(), NametagRenderingKt.getBackBackgroundGLColorOrEmpty(), entity);
+        NametagRenderingKt.drawFrontBackground(entity.getDisplayName().getFormattedText(), ModConfig.INSTANCE.getBackgroundColor().getRed(), ModConfig.INSTANCE.getBackgroundColor().getGreen(), ModConfig.INSTANCE.getBackgroundColor().getBlue(), NametagRenderingKt.getBackBackgroundAlpha(), entity);
     }
 
     @Redirect(

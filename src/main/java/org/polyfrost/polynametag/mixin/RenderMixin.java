@@ -86,7 +86,7 @@ public abstract class RenderMixin {
     private void drawBG(Entity entityIn, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
         if (PolyNametag.INSTANCE.getShouldDrawIndicator() && ModConfig.INSTANCE.getEssentialOffset()) GlStateManager.translate(5f, 0f, 0f);
-        NametagRenderingKt.drawFrontBackground(str, NametagRenderingKt.getBackBackgroundGLColorOrEmpty(), entityIn);
+        NametagRenderingKt.drawFrontBackground(str, ModConfig.INSTANCE.getBackgroundColor().getRed(), ModConfig.INSTANCE.getBackgroundColor().getGreen(), ModConfig.INSTANCE.getBackgroundColor().getBlue(), NametagRenderingKt.getBackBackgroundAlpha(), entityIn);
     }
 
     @Inject(method = "renderLivingLabel", at = @At("HEAD"), cancellable = true)

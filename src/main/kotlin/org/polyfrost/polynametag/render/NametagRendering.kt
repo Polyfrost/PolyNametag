@@ -19,7 +19,6 @@ import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.PolyNametag.drawingIndicator
 import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
-import java.awt.Color
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -29,22 +28,15 @@ var drawingWithDepth = false
 
 internal fun shouldDrawBackground() =
     ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
-
-val NO_COLOR = Color(0f, 0f, 0f, 0f)
-fun getBackBackgroundGLColorOrEmpty(): Color =
-    if (shouldDrawBackground()) with(ModConfig.backgroundColor) {
-        Color(red, green, blue, alpha.coerceAtMost(63))
-    } else {
-        NO_COLOR
-    }
+fun getBackBackgroundAlpha(): Int = if (shouldDrawBackground()) ModConfig.backgroundColor.alpha.coerceAtMost(63) else 0
 
 fun drawFrontBackground(text: String, entity: Entity) {
-    drawFrontBackground(text, ModConfig.backgroundColor.toJavaColor(), entity)
+    drawFrontBackground(text, ModConfig.backgroundColor.red, ModConfig.backgroundColor.green, ModConfig.backgroundColor.blue, ModConfig.backgroundColor.alpha, entity)
 }
 
-fun drawFrontBackground(text: String, color: Color, entity: Entity) {
+fun drawFrontBackground(text: String, red: Int, green: Int, blue: Int, alpha: Int, entity: Entity) {
     val halfWidth = mc.fontRendererObj.getStringWidth(text) / 2 + 1.0
-    drawBackground(-halfWidth, halfWidth, color, entity)
+    drawBackground(-halfWidth, halfWidth, red, green, blue, alpha, entity)
 }
 
 data class Vec2(val x: Int, val y: Int)
@@ -52,15 +44,15 @@ data class Vec2(val x: Int, val y: Int)
 val points = listOf(Vec2(1, 1), Vec2(1, -1), Vec2(-1, -1), Vec2(-1, 1))
 val translate = listOf(Vec2(1, 0), Vec2(0, -1), Vec2(-1, 0), Vec2(0, 1))
 
-fun drawFrontBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
-    drawBackground(xStart, xEnd, color, entity)
+fun drawFrontBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int, alpha: Int, entity: Entity) {
+    drawBackground(xStart, xEnd, red, green, blue, alpha, entity)
 }
 
 fun drawFrontBackground(xStart: Double, xEnd: Double, entity: Entity) {
-    drawBackground(xStart, xEnd, ModConfig.backgroundColor.toJavaColor(), entity)
+    drawBackground(xStart, xEnd, ModConfig.backgroundColor.red, ModConfig.backgroundColor.green, ModConfig.backgroundColor.blue, ModConfig.backgroundColor.alpha, entity)
 }
 
-fun drawBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
+fun drawBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int, alpha: Int, entity: Entity) {
     if (!ModConfig.enabled) return
     if (!shouldDrawBackground()) return
     val realStart = xStart - if (PolyNametag.shouldDrawIndicator) 10 else 0
@@ -69,11 +61,9 @@ fun drawBackground(xStart: Double, xEnd: Double, color: Color, entity: Entity) {
     GL11.glPushMatrix()
     GL11.glTranslated((realStart + xEnd) / 2f, 3.5, 0.01)
     GL11.glBegin(GL11.GL_TRIANGLE_FAN)
-    with(color) {
-        val a = alpha.coerceAtMost(63)
-        val realAlpha = if (drawingWithDepth) (alpha - a) / (255 - a).toFloat() else alpha / 255f
-        GL11.glColor4f(red / 255f, green / 255f, blue / 255f, realAlpha)
-    }
+    val a = alpha.coerceAtMost(63)
+    val realAlpha = if (drawingWithDepth) (alpha - a) / (255 - a).toFloat() else alpha / 255f
+    GL11.glColor4f(red / 255f, green / 255f, blue / 255f, realAlpha)
     drawingWithDepth = false
 
     val halfWidth = (xEnd - realStart) / 2f + ModConfig.paddingX

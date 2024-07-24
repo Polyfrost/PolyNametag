@@ -61,7 +61,7 @@ public abstract class AboveHeadRenderMixin {
     private void drawBG(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
-        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, NametagRenderingKt.getBackBackgroundGLColorOrEmpty(), entityIn);
+        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, ModConfig.INSTANCE.getBackgroundColor().getRed(), ModConfig.INSTANCE.getBackgroundColor().getGreen(), ModConfig.INSTANCE.getBackgroundColor().getBlue(), NametagRenderingKt.getBackBackgroundAlpha(), entityIn);
         GlStateManager.enableDepth();
         NametagRenderingKt.setDrawingWithDepth(true);
         NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, entityIn);
