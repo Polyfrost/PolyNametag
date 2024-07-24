@@ -15,6 +15,7 @@
     "RenderAccessor",
     "RendererLivingEntityMixin",
     "RenderMixin",
+    "RenderPlayerMixin",
     "essential.OnlineIndicatorMixin",
     "levelhead.AboveHeadRenderMixin",
     "levelhead.AboveHeadRenderMixin_ModifyArgs",

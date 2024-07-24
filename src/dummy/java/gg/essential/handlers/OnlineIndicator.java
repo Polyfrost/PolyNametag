@@ -7,8 +7,4 @@ public class OnlineIndicator {
     public static void drawNametagIndicator(UMatrixStack matrixStack, Entity entity, String str, int light) {
     }
 
-    public static boolean currentlyDrawingEntityName() {
-        return false;
-    }
-
 }

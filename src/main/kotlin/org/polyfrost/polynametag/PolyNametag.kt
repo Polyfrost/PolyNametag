@@ -43,6 +43,7 @@ object PolyNametag {
 
     var nametags = ArrayList<Any>()
 
+    var drawingPlayerName = false
     var drawingTags = false
     var drawingWorld = false
     var drawingInventory = false
