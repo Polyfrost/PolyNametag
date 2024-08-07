@@ -39,7 +39,7 @@ public abstract class AboveHeadRenderMixin {
         )
     )
     private boolean polyNametag$screwYouLevelhead(@Coerce Object instance, EntityPlayer player) {
-        return !(ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag()) && Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.getUniqueID().equals(player.getUniqueID());
+        return !(ModConfig.INSTANCE.getEnabled() && ModConfig.INSTANCE.getShowOwnNametag()) && Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.getUniqueID().equals(player.getUniqueID());
     }
 
     @Dynamic("LevelHead")
@@ -52,16 +52,16 @@ public abstract class AboveHeadRenderMixin {
         )
     )
     private int polyNametag$modifyStringRendering(FontRenderer fontRenderer, String text, int x, int y, int color) {
-        if (!ModConfig.INSTANCE.enabled) return fontRenderer.drawString(text, x, y, color);
+        if (!ModConfig.INSTANCE.getEnabled()) return fontRenderer.drawString(text, x, y, color);
         return NametagRenderingKt.drawStringWithoutZFighting(fontRenderer, text, x, y, color);
     }
 
     @Dynamic("LevelHead")
     @Inject(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;drawDirect()V", shift = At.Shift.AFTER))
     private void drawBG(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
+        if (!ModConfig.INSTANCE.getEnabled()) return;
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
-        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, ModConfig.INSTANCE.getBackgroundColor().getRed(), ModConfig.INSTANCE.getBackgroundColor().getGreen(), ModConfig.INSTANCE.getBackgroundColor().getBlue(), NametagRenderingKt.getBackBackgroundAlpha(), entityIn);
+        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, ModConfig.INSTANCE.getBackgroundColor().red(), ModConfig.INSTANCE.getBackgroundColor().green(), ModConfig.INSTANCE.getBackgroundColor().blue(), NametagRenderingKt.getBackBackgroundAlpha(), entityIn);
         GlStateManager.enableDepth();
         NametagRenderingKt.setDrawingWithDepth(true);
         NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, entityIn);

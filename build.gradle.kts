@@ -52,7 +52,8 @@ loom {
     if (project.platform.isLegacyForge) {
         runConfigs {
             "client" {
-                programArgs("--tweakClass", "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker")
+                programArgs("--tweakClass", "org.polyfrost.oneconfig.internal.legacy.OneConfigTweaker")
+                programArgs("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
                 property("mixin.debug.export", "true")
             }
         }
@@ -85,12 +86,19 @@ sourceSets {
 // Adds the Polyfrost maven repository so that we can get the libraries necessary to develop the mod.
 repositories {
     maven("https://repo.polyfrost.org/releases")
+    maven("https://repo.polyfrost.org/snapshots")
 }
 
 // Configures the libraries/dependencies for your mod.
 dependencies {
     // Adds the OneConfig library, so we can develop with it.
-    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
+    val oneconfig = "1.0.0-alpha.19"
+    implementation("org.polyfrost.oneconfig:config-impl:$oneconfig")
+    implementation("org.polyfrost.oneconfig:commands:$oneconfig")
+    implementation("org.polyfrost.oneconfig:events:$oneconfig")
+    implementation("org.polyfrost.oneconfig:ui:$oneconfig")
+    implementation("org.polyfrost.oneconfig:internal:$oneconfig")
+    modImplementation("org.polyfrost.oneconfig:$platform:$oneconfig")
 
     val loaderPlatform = when {
         platform.isFabric -> "fabric"
@@ -101,7 +109,6 @@ dependencies {
     // If we are building for legacy forge, includes the launch wrapper with `shade` as we configured earlier.
     if (platform.isLegacyForge) {
         compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
-        shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta17")
     }
 }
 
@@ -182,7 +189,7 @@ tasks {
                 "ForceLoadAsMod" to true, // We want to load this jar as a mod, so we force Forge to do so.
                 "TweakOrder" to "0", // Makes sure that the OneConfig launch wrapper is loaded as soon as possible.
                 "MixinConfigs" to "mixins.${mod_id}.json", // We want to use our mixin configuration, so we specify it here.
-                "TweakClass" to "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker" // Loads the OneConfig launch wrapper.
+                "TweakClass" to "org.polyfrost.oneconfig.internal.legacy.OneConfigTweaker" // Loads the OneConfig launch wrapper.
             )
         }
         dependsOn(shadowJar)

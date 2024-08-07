@@ -1,10 +1,5 @@
 package org.polyfrost.polynametag.render
 
-import cc.polyfrost.oneconfig.config.elements.BasicOption
-import cc.polyfrost.oneconfig.gui.OneConfigGui
-import cc.polyfrost.oneconfig.libs.universal.UResolution
-import cc.polyfrost.oneconfig.utils.InputHandler
-import cc.polyfrost.oneconfig.utils.dsl.mc
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.entity.RendererLivingEntity
@@ -15,6 +10,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.opengl.GL11
 import kotlin.math.atan
 import net.minecraft.client.renderer.GlStateManager as GL
+
+/*
 
 class NametagPreview(
     description: String = "",
@@ -125,3 +122,5 @@ class NametagPreview(
         GL.setActiveTexture(OpenGlHelper.defaultTexUnit)
     }
 }
+
+ */

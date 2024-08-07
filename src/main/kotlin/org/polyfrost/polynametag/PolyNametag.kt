@@ -1,6 +1,6 @@
 package org.polyfrost.polynametag
 
-import cc.polyfrost.oneconfig.utils.dsl.mc
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.entity.Render
@@ -16,7 +16,7 @@ import org.polyfrost.polynametag.config.ModConfig
 import org.polyfrost.polynametag.mixin.MinecraftAccessor
 import org.polyfrost.polynametag.mixin.RenderAccessor
 
-@Mod(modid = PolyNametag.MODID, name = PolyNametag.NAME, version = PolyNametag.VERSION, modLanguageAdapter = "cc.polyfrost.oneconfig.utils.KotlinLanguageAdapter")
+@Mod(modid = PolyNametag.MODID, name = PolyNametag.NAME, version = PolyNametag.VERSION, modLanguageAdapter = "org.polyfrost.oneconfig.utils.v1.forge.KotlinLanguageAdapter")
 object PolyNametag {
     const val MODID = "@ID@"
     const val NAME = "@NAME@"
@@ -48,6 +48,8 @@ object PolyNametag {
     var drawingWorld = false
     var drawingInventory = false
     var shouldDrawIndicator = false
+
+    private val mc by lazy { Minecraft.getMinecraft() }
 
     fun onRender() {
         if (!ModConfig.enabled) return
