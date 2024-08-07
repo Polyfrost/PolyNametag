@@ -1,8 +1,5 @@
 package org.polyfrost.polynametag.render
 
-import cc.polyfrost.oneconfig.renderer.TextRenderer
-import cc.polyfrost.oneconfig.utils.dsl.getAlpha
-import cc.polyfrost.oneconfig.utils.dsl.mc
 import club.sk1er.patcher.config.PatcherConfig
 import gg.essential.Essential
 import gg.essential.config.EssentialConfig
@@ -10,6 +7,7 @@ import gg.essential.connectionmanager.common.enums.ProfileStatus
 import gg.essential.data.OnboardingData
 import gg.essential.handlers.OnlineIndicator
 import gg.essential.universal.UMatrixStack
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.Entity
@@ -26,12 +24,14 @@ var drawingText = false
 
 var drawingWithDepth = false
 
+private val mc by lazy { Minecraft.getMinecraft() }
+
 internal fun shouldDrawBackground() =
     ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
-fun getBackBackgroundAlpha(): Int = if (shouldDrawBackground()) ModConfig.backgroundColor.alpha.coerceAtMost(63) else 0
+fun getBackBackgroundAlpha(): Int = if (shouldDrawBackground()) ModConfig.backgroundColor.a.coerceAtMost(63) else 0
 
 fun drawFrontBackground(text: String, entity: Entity) {
-    drawFrontBackground(text, ModConfig.backgroundColor.red, ModConfig.backgroundColor.green, ModConfig.backgroundColor.blue, ModConfig.backgroundColor.alpha, entity)
+    drawFrontBackground(text, ModConfig.backgroundColor.r, ModConfig.backgroundColor.g, ModConfig.backgroundColor.b, ModConfig.backgroundColor.a, entity)
 }
 
 fun drawFrontBackground(text: String, red: Int, green: Int, blue: Int, alpha: Int, entity: Entity) {
@@ -49,7 +49,7 @@ fun drawFrontBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue
 }
 
 fun drawFrontBackground(xStart: Double, xEnd: Double, entity: Entity) {
-    drawBackground(xStart, xEnd, ModConfig.backgroundColor.red, ModConfig.backgroundColor.green, ModConfig.backgroundColor.blue, ModConfig.backgroundColor.alpha, entity)
+    drawBackground(xStart, xEnd, ModConfig.backgroundColor.r, ModConfig.backgroundColor.g, ModConfig.backgroundColor.b, ModConfig.backgroundColor.a, entity)
 }
 
 fun drawBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int, alpha: Int, entity: Entity) {
@@ -122,7 +122,8 @@ internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: 
     return when (ModConfig.textType) {
         0 -> drawString(text, x, y, color, false)
         1 -> drawString(text, x, y, color, true)
-        2 -> TextRenderer.drawBorderedText(text, x, y, color, color.getAlpha())
+       // 2 -> TextRenderer.drawBorderedText(text, x, y, color, color.getAlpha())
+        // fixme
         else -> 0
     }.apply {
         drawingText = false
