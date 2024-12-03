@@ -92,7 +92,7 @@ public abstract class RenderMixin {
     @Inject(method = "renderLivingLabel", at = @At("HEAD"), cancellable = true)
     private void move(Entity entityIn, String str, double x, double y, double z, int maxDistance, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
-        PolyNametag.INSTANCE.setShouldDrawIndicator(PolyNametag.INSTANCE.getDrawingPlayerName() && NametagRenderingKt.canDrawIndicator(entityIn));
+        //PolyNametag.INSTANCE.setShouldDrawIndicator(PolyNametag.INSTANCE.getDrawingPlayerName() && NametagRenderingKt.canDrawIndicator(entityIn));
         PolyNametag.INSTANCE.setDrawingPlayerName(false);
         if (!PolyNametag.INSTANCE.getDrawingTags() && PolyNametag.INSTANCE.getDrawingWorld()) {
             PolyNametag.INSTANCE.getNametags().add(new PolyNametag.LabelInfo((Render<Entity>) (Object) this, entityIn, str, x, y, z, maxDistance));
@@ -117,8 +117,8 @@ public abstract class RenderMixin {
         if (!ModConfig.INSTANCE.enabled) return;
         PolyNametag instance = PolyNametag.INSTANCE;
         if (instance.isEssential() && instance.getShouldDrawIndicator()) {
-            NametagRenderingKt.drawIndicator(entityIn, str);
-            instance.setShouldDrawIndicator(false);
+            //NametagRenderingKt.drawIndicator(entityIn, str);
+            //instance.setShouldDrawIndicator(false);
         }
     }
 

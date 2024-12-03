@@ -97,22 +97,22 @@ fun drawBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int
     GL11.glDisable(GL11.GL_LINE_SMOOTH)
 }
 
-fun drawIndicator(entity: Entity, string: String) {
-    if (entity !is EntityPlayer) return
-    drawingIndicator = true
-    OnlineIndicator.drawNametagIndicator(UMatrixStack(), entity, string, 0)
-    drawingIndicator = false
-}
+//fun drawIndicator(entity: Entity, string: String) {
+//    if (entity !is EntityPlayer) return
+//    drawingIndicator = true
+//    OnlineIndicator.drawNametagIndicator(UMatrixStack(), entity, string, 0)
+//    drawingIndicator = false
+//}
 
-fun Entity.canDrawIndicator(): Boolean {
-    if (!PolyNametag.isEssential) return false
-    if (OnboardingData.hasAcceptedTos() && EssentialConfig.showEssentialIndicatorOnNametag && this is EntityPlayer) {
-        if (Essential.getInstance().connectionManager.profileManager.getStatus(this.gameProfile.id) != ProfileStatus.OFFLINE) {
-            return true
-        }
-    }
-    return false
-}
+//fun Entity.canDrawIndicator(): Boolean {
+//    if (!PolyNametag.isEssential) return false
+//    if (OnboardingData.hasAcceptedTos() && EssentialConfig.showEssentialIndicatorOnNametag && this is EntityPlayer) {
+//        if (Essential.getInstance().connectionManager.profileManager.getStatus(this.gameProfile.id) != ProfileStatus.OFFLINE) {
+//            return true
+//        }
+//    }
+//    return false
+//}
 
 internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
     if (this !is FontRendererAccessor) return 0
