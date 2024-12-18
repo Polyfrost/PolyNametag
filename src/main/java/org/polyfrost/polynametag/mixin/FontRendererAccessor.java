@@ -6,9 +6,11 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(FontRenderer.class)
 public interface FontRendererAccessor {
+
     @Invoker
     void invokeResetStyles();
 
     @Invoker
     int invokeRenderString(String text, float x, float y, int color, boolean dropShadow);
+
 }

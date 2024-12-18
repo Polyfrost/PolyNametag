@@ -1,7 +1,6 @@
 package org.polyfrost.polynametag.mixin.levelhead;
 
-import org.polyfrost.polynametag.config.ModConfig;
-import org.polyfrost.polynametag.render.NametagRenderingKt;
+import org.polyfrost.polynametag.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -21,15 +20,15 @@ public abstract class AboveHeadRenderMixin_ModifyArgs {
     @Dynamic("LevelHead")
     @ModifyArg(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics$GL;translate(FFF)V"), index = 1, remap = false)
     private float polyNametag$changeOffset(float original) {
-        if (!ModConfig.INSTANCE.getEnabled()) return original;
-        return original + ModConfig.INSTANCE.getHeightOffset();
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return original;
+        return original + PolyNametagConfig.INSTANCE.getHeightOffset();
     }
 
     @Dynamic("LevelHead")
     @ModifyArgs(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics$GL;scale(DDD)V"), remap = false)
     private void polyNametag$changeScale(Args args) {
-        if (!ModConfig.INSTANCE.getEnabled()) return;
-        double scale = ModConfig.INSTANCE.getScale();
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return;
+        double scale = PolyNametagConfig.INSTANCE.getScale();
         args.set(0, ((double) args.get(0)) * scale);
         args.set(1, ((double) args.get(1)) * scale);
         args.set(2, ((double) args.get(2)) * scale);
@@ -38,7 +37,7 @@ public abstract class AboveHeadRenderMixin_ModifyArgs {
     @Dynamic("LevelHead")
     @ModifyArgs(method = "renderName", remap = false, at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;color(FFFF)Lgg/essential/universal/UGraphics;"))
     private void polyNametag$changeBackgroundColor(Args args) {
-        if (!ModConfig.INSTANCE.getEnabled()) return;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return;
         args.set(3, 0f);
     }
 

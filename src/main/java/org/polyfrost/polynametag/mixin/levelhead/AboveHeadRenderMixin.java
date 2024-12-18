@@ -5,15 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
-import org.polyfrost.polynametag.config.ModConfig;
+import org.polyfrost.polynametag.PolyNametagConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.awt.*;
 
 /**
  * Taken from Patcher under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
@@ -39,7 +37,7 @@ public abstract class AboveHeadRenderMixin {
         )
     )
     private boolean polyNametag$screwYouLevelhead(@Coerce Object instance, EntityPlayer player) {
-        return !(ModConfig.INSTANCE.getEnabled() && ModConfig.INSTANCE.getShowOwnNametag()) && Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.getUniqueID().equals(player.getUniqueID());
+        return !(PolyNametagConfig.INSTANCE.getEnabled() && PolyNametagConfig.INSTANCE.getShowOwnNametag()) && Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.getUniqueID().equals(player.getUniqueID());
     }
 
     @Dynamic("LevelHead")
@@ -52,16 +50,16 @@ public abstract class AboveHeadRenderMixin {
         )
     )
     private int polyNametag$modifyStringRendering(FontRenderer fontRenderer, String text, int x, int y, int color) {
-        if (!ModConfig.INSTANCE.getEnabled()) return fontRenderer.drawString(text, x, y, color);
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return fontRenderer.drawString(text, x, y, color);
         return NametagRenderingKt.drawStringWithoutZFighting(fontRenderer, text, x, y, color);
     }
 
     @Dynamic("LevelHead")
     @Inject(method = "renderName", at = @At(value = "INVOKE", target = "Lgg/essential/universal/UGraphics;drawDirect()V", shift = At.Shift.AFTER))
     private void drawBG(LevelheadTag tag, EntityPlayer entityIn, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.getEnabled()) return;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return;
         int stringWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tag.getString()) / 2;
-        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, ModConfig.INSTANCE.getBackgroundColor().red(), ModConfig.INSTANCE.getBackgroundColor().green(), ModConfig.INSTANCE.getBackgroundColor().blue(), NametagRenderingKt.getBackBackgroundAlpha(), entityIn);
+        NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, PolyNametagConfig.INSTANCE.getBackgroundColor().red(), PolyNametagConfig.INSTANCE.getBackgroundColor().green(), PolyNametagConfig.INSTANCE.getBackgroundColor().blue(), NametagRenderingKt.getBackBackgroundAlpha(), entityIn);
         GlStateManager.enableDepth();
         NametagRenderingKt.setDrawingWithDepth(true);
         NametagRenderingKt.drawFrontBackground(-stringWidth - 2, stringWidth + 1, entityIn);

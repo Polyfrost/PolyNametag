@@ -8,8 +8,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import org.polyfrost.polynametag.NametagRenderer;
 import org.polyfrost.polynametag.PolyNametag;
-import org.polyfrost.polynametag.config.ModConfig;
+import org.polyfrost.polynametag.PolyNametagConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,7 +28,7 @@ public abstract class RendererLivingEntityMixin  {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isGuiEnabled()Z")
     )
     private boolean gui() {
-        shouldShowOwnNametag = ((ModConfig.INSTANCE.enabled && ModConfig.INSTANCE.getShowOwnNametag() && (ModConfig.INSTANCE.getShowInInventory() || !PolyNametag.INSTANCE.getDrawingInventory()) && (!PolyNametag.INSTANCE.getDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) || ModConfig.INSTANCE.getNametagPreview().getDrawing());
+        shouldShowOwnNametag = ((PolyNametagConfig.INSTANCE.getEnabled() && PolyNametagConfig.INSTANCE.getShowOwnNametag() && (PolyNametagConfig.INSTANCE.getShowInInventory() || !NametagRenderer.isCurrentlyDrawingInventory()) && (!NametagRenderer.isCurrentlyDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) || PolyNametagConfig.INSTANCE.getNametagPreview().getDrawing());
         return shouldShowOwnNametag || Minecraft.isGuiEnabled();
     }
 
@@ -52,8 +53,11 @@ public abstract class RendererLivingEntityMixin  {
         index = 1
     )
     private float polyNametag$overrideY(float y) {
-        if (!ModConfig.INSTANCE.enabled) return y;
-        return y + ModConfig.INSTANCE.getHeightOffset();
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return y;
+        }
+
+        return y + PolyNametagConfig.INSTANCE.getHeightOffset();
     }
 
     @ModifyArg(
@@ -66,7 +70,7 @@ public abstract class RendererLivingEntityMixin  {
         index = 0
     )
     private float polyNametag$fixPerspectiveRotation(float x) {
-        return (!PolyNametag.INSTANCE.isPatcher() && ModConfig.INSTANCE.enabled && Minecraft.getMinecraft().gameSettings.thirdPersonView == 2) ? -x : x;
+        return (!PolyNametag.INSTANCE.isPatcher() && PolyNametagConfig.INSTANCE.getEnabled() && Minecraft.getMinecraft().gameSettings.thirdPersonView == 2) ? -x : x;
     }
 
     @Inject(
@@ -77,22 +81,31 @@ public abstract class RendererLivingEntityMixin  {
         )
     )
     private void polyNametag$modifyScale(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
-        float scale = ModConfig.INSTANCE.getScale();
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return;
+        }
+
+        float scale = PolyNametagConfig.INSTANCE.getScale();
         GlStateManager.scale(scale, scale, scale);
     }
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()V"))
     private void cancel(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return;
+        }
+
         Tessellator.getInstance().getWorldRenderer().reset();
     }
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()V", shift = At.Shift.AFTER))
     private void drawBG(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
-        if (PolyNametag.INSTANCE.getShouldDrawIndicator() && ModConfig.INSTANCE.getEssentialOffset()) GlStateManager.translate(5f, 0f, 0f);
-        NametagRenderingKt.drawFrontBackground(entity.getDisplayName().getFormattedText(), ModConfig.INSTANCE.getBackgroundColor().getRed(), ModConfig.INSTANCE.getBackgroundColor().getGreen(), ModConfig.INSTANCE.getBackgroundColor().getBlue(), NametagRenderingKt.getBackBackgroundAlpha(), entity);
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return;
+        }
+
+        if (NametagRenderer.isDrawingIndicator() && PolyNametagConfig.INSTANCE.getEssentialOffset()) GlStateManager.translate(5f, 0f, 0f);
+        NametagRenderingKt.drawFrontBackground(entity.getDisplayName().getFormattedText(), PolyNametagConfig.INSTANCE.getBackgroundColor().getRed(), PolyNametagConfig.INSTANCE.getBackgroundColor().getGreen(), PolyNametagConfig.INSTANCE.getBackgroundColor().getBlue(), NametagRenderingKt.getBackBackgroundAlpha(), entity);
     }
 
     @Redirect(
@@ -103,27 +116,37 @@ public abstract class RendererLivingEntityMixin  {
         )
     )
     private int polyNametag$renderDrawString(FontRenderer fontRenderer, String text, int x, int y, int color) {
-        if (!ModConfig.INSTANCE.enabled) return fontRenderer.drawString(text, x, y, color);
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return fontRenderer.drawString(text, x, y, color);
+        }
+
         return NametagRenderingKt.drawStringWithoutZFighting(fontRenderer, text, x, y, color);
     }
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At("HEAD"), cancellable = true)
     private void move(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
-        PolyNametag.INSTANCE.setShouldDrawIndicator(NametagRenderingKt.canDrawIndicator(entity));
-        if (!PolyNametag.INSTANCE.getDrawingTags() && PolyNametag.INSTANCE.getDrawingWorld()) {
-            PolyNametag.INSTANCE.getNametags().add(new PolyNametag.NameInfo((RendererLivingEntity<EntityLivingBase>) (Object) this, entity, x, y, z));
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return;
+        }
+
+        NametagRenderer.setDrawingIndicator(NametagRenderer.canDrawEssentialIndicator(entity));
+        if (!NametagRenderer.isCurrentlyDrawingTags() && NametagRenderer.isCurrentlyDrawingWorld()) {
+            //noinspection unchecked
+            NametagRenderer.getNametags().add(new NametagRenderer.NameItem((RendererLivingEntity<EntityLivingBase>) (Object) this, entity, x, y, z));
             ci.cancel();
         }
     }
 
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;enableLighting()V"))
     private void essential(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.enabled) return;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return;
+        }
+
         PolyNametag instance = PolyNametag.INSTANCE;
-        if (instance.isEssential() && instance.getShouldDrawIndicator()) {
-            NametagRenderingKt.drawIndicator(entity, entity.getDisplayName().getFormattedText());
-            instance.setShouldDrawIndicator(false);
+        if (instance.isEssential() && NametagRenderer.isDrawingIndicator()) {
+            NametagRenderer.drawEssentialIndicator(entity, entity.getDisplayName().getFormattedText());
+            NametagRenderer.setDrawingIndicator(false);
         }
     }
 }

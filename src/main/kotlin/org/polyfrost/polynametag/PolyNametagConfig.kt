@@ -1,17 +1,17 @@
-package org.polyfrost.polynametag.config
+package org.polyfrost.polynametag
 
 import club.sk1er.patcher.config.OldPatcherConfig
 import club.sk1er.patcher.config.PatcherConfig
 import org.polyfrost.oneconfig.api.config.v1.Config
+import org.polyfrost.oneconfig.api.config.v1.Property
 import org.polyfrost.oneconfig.api.config.v1.annotations.Color
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.ui.v1.Notifications
-import org.polyfrost.polynametag.PolyNametag
-import org.polyfrost.polyui.utils.rgba
+import org.polyfrost.polyui.color.rgba
 
-object ModConfig : Config("nametag.json", "/polynametag.svg", PolyNametag.NAME, Category.QOL) {
+object PolyNametagConfig : Config("nametag.json", "/polynametag.svg", PolyNametag.NAME, Category.QOL) {
 
     @Switch(title = "Enabled")
     var enabled = false
@@ -76,10 +76,18 @@ object ModConfig : Config("nametag.json", "/polynametag.svg", PolyNametag.NAME, 
     init {
         addDependency("backgroundColor", "background")
         addDependency("background", "Patcher's Disable Nametag Boxes. Please turn it off to use this feature.") {
-            !PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes
+            if (PolyNametag.isPatcher && PatcherConfig.disableNametagBoxes) {
+                Property.Display.DISABLED
+            } else {
+                Property.Display.SHOWN
+            }
         }
         addDependency("showOwnNametag", "Patcher's Show Own Nametag. Please turn it off to use this feature.") {
-            !PolyNametag.isPatcher || !PatcherConfig.showOwnNametag
+            if (PolyNametag.isPatcher && PatcherConfig.showOwnNametag) {
+                Property.Display.DISABLED
+            } else {
+                Property.Display.SHOWN
+            }
         }
         addDependency("cornerRadius", "rounded")
         addDependency("showInInventory", "showOwnNametag")

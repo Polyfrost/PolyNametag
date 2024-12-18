@@ -3,7 +3,7 @@ package org.polyfrost.polynametag.mixin.essential;
 import gg.essential.universal.UMatrixStack;
 import net.minecraft.entity.Entity;
 import org.polyfrost.polynametag.PolyNametag;
-import org.polyfrost.polynametag.config.ModConfig;
+import org.polyfrost.polynametag.PolyNametagConfig;
 import org.polyfrost.polynametag.render.NametagRenderingKt;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,14 +29,14 @@ public class OnlineIndicatorMixin {
         )
     )
     private static void polyNametag$modifyNametagColor(Args args) {
-        if (!ModConfig.INSTANCE.getEnabled()) return;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return;
         args.set(3, 0);
     }
 
     @Dynamic("Essential")
     @Inject(method = "drawNametagIndicator", at = @At("HEAD"), cancellable = true)
     private static void skip(UMatrixStack matrixStack, Entity entity, String str, int light, CallbackInfo ci) {
-        if (!ModConfig.INSTANCE.getEnabled()) return;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return;
         if (!PolyNametag.INSTANCE.getDrawingIndicator()) ci.cancel();
     }
 
@@ -51,7 +51,7 @@ public class OnlineIndicatorMixin {
         index = 3
     )
     private static double polyNametag$modifyBackgroundZ(double z) {
-        if (!ModConfig.INSTANCE.getEnabled()) return z;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) return z;
         if (!NametagRenderingKt.shouldDrawBackground()) return z;
         return z + 0.01;
     }

@@ -13,9 +13,10 @@ import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import org.lwjgl.opengl.GL11
+import org.polyfrost.polynametag.NametagRenderer
 import org.polyfrost.polynametag.PolyNametag
 import org.polyfrost.polynametag.PolyNametag.drawingIndicator
-import org.polyfrost.polynametag.config.ModConfig
+import org.polyfrost.polynametag.PolyNametagConfig
 import org.polyfrost.polynametag.mixin.FontRendererAccessor
 import kotlin.math.cos
 import kotlin.math.sin
@@ -27,11 +28,11 @@ var drawingWithDepth = false
 private val mc by lazy { Minecraft.getMinecraft() }
 
 internal fun shouldDrawBackground() =
-    ModConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
-fun getBackBackgroundAlpha(): Int = if (shouldDrawBackground()) ModConfig.backgroundColor.a.coerceAtMost(63) else 0
+    PolyNametagConfig.background && (!PolyNametag.isPatcher || !PatcherConfig.disableNametagBoxes)
+fun getBackBackgroundAlpha(): Int = if (shouldDrawBackground()) PolyNametagConfig.backgroundColor.a.coerceAtMost(63) else 0
 
 fun drawFrontBackground(text: String, entity: Entity) {
-    drawFrontBackground(text, ModConfig.backgroundColor.r, ModConfig.backgroundColor.g, ModConfig.backgroundColor.b, ModConfig.backgroundColor.a, entity)
+    drawFrontBackground(text, PolyNametagConfig.backgroundColor.r, PolyNametagConfig.backgroundColor.g, PolyNametagConfig.backgroundColor.b, PolyNametagConfig.backgroundColor.a, entity)
 }
 
 fun drawFrontBackground(text: String, red: Int, green: Int, blue: Int, alpha: Int, entity: Entity) {
@@ -49,13 +50,13 @@ fun drawFrontBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue
 }
 
 fun drawFrontBackground(xStart: Double, xEnd: Double, entity: Entity) {
-    drawBackground(xStart, xEnd, ModConfig.backgroundColor.r, ModConfig.backgroundColor.g, ModConfig.backgroundColor.b, ModConfig.backgroundColor.a, entity)
+    drawBackground(xStart, xEnd, PolyNametagConfig.backgroundColor.r, PolyNametagConfig.backgroundColor.g, PolyNametagConfig.backgroundColor.b, PolyNametagConfig.backgroundColor.a, entity)
 }
 
 fun drawBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int, alpha: Int, entity: Entity) {
-    if (!ModConfig.enabled) return
+    if (!PolyNametagConfig.enabled) return
     if (!shouldDrawBackground()) return
-    val realStart = xStart - if (PolyNametag.shouldDrawIndicator) 10 else 0
+    val realStart = xStart - if (NametagRenderer.isDrawingIndicator) 10 else 0
     GL11.glEnable(GL11.GL_LINE_SMOOTH)
     GlStateManager.disableTexture2D()
     GL11.glPushMatrix()
@@ -66,9 +67,9 @@ fun drawBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int
     GL11.glColor4f(red / 255f, green / 255f, blue / 255f, realAlpha)
     drawingWithDepth = false
 
-    val halfWidth = (xEnd - realStart) / 2f + ModConfig.paddingX
+    val halfWidth = (xEnd - realStart) / 2f + PolyNametagConfig.paddingX
 
-    val radius = if (ModConfig.rounded) ModConfig.cornerRadius.coerceAtMost(4.5f + ModConfig.paddingY).coerceAtMost(halfWidth.toFloat()) else 0f
+    val radius = if (PolyNametagConfig.rounded) PolyNametagConfig.cornerRadius.coerceAtMost(4.5f + PolyNametagConfig.paddingY).coerceAtMost(halfWidth.toFloat()) else 0f
 
     val width = halfWidth - radius
 
@@ -78,8 +79,8 @@ fun drawBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int
     for (a in 0..3) {
         val (transX, transY) = translate[a]
         val x = points[a].x * width
-        val y = points[a].y * (4.5 + ModConfig.paddingY - radius)
-        if (ModConfig.rounded) {
+        val y = points[a].y * (4.5 + PolyNametagConfig.paddingY - radius)
+        if (PolyNametagConfig.rounded) {
             for (b in 0 until 90 / quality) {
                 val radian = Math.toRadians((a * 90 + b * quality).toDouble())
                 GL11.glVertex2d(x + sin(radian) * radius, y + cos(radian) * radius)
@@ -97,29 +98,12 @@ fun drawBackground(xStart: Double, xEnd: Double, red: Int, green: Int, blue: Int
     GL11.glDisable(GL11.GL_LINE_SMOOTH)
 }
 
-fun drawIndicator(entity: Entity, string: String) {
-    if (entity !is EntityPlayer) return
-    drawingIndicator = true
-    OnlineIndicator.drawNametagIndicator(UMatrixStack(), entity, string, 0)
-    drawingIndicator = false
-}
-
-fun Entity.canDrawIndicator(): Boolean {
-    if (!PolyNametag.isEssential) return false
-    if (OnboardingData.hasAcceptedTos() && EssentialConfig.showEssentialIndicatorOnNametag && this is EntityPlayer) {
-        if (Essential.getInstance().connectionManager.profileManager.getStatus(this.gameProfile.id) != ProfileStatus.OFFLINE) {
-            return true
-        }
-    }
-    return false
-}
-
 internal fun FontRenderer.drawStringWithoutZFighting(text: String, x: Float, y: Float, color: Int): Int {
     if (this !is FontRendererAccessor) return 0
     GlStateManager.pushMatrix()
     GlStateManager.translate(0f, 0f, -0.01f)
     drawingText = true
-    return when (ModConfig.textType) {
+    return when (PolyNametagConfig.textType) {
         0 -> drawString(text, x, y, color, false)
         1 -> drawString(text, x, y, color, true)
        // 2 -> TextRenderer.drawBorderedText(text, x, y, color, color.getAlpha())
