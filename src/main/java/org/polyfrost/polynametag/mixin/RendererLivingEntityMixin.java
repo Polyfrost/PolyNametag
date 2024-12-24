@@ -3,6 +3,7 @@ package org.polyfrost.polynametag.mixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
@@ -110,7 +111,7 @@ public abstract class RendererLivingEntityMixin  {
     @Inject(method = "renderName(Lnet/minecraft/entity/EntityLivingBase;DDD)V", at = @At("HEAD"), cancellable = true)
     private void move(EntityLivingBase entity, double x, double y, double z, CallbackInfo ci) {
         if (!ModConfig.INSTANCE.enabled) return;
-        //PolyNametag.INSTANCE.setShouldDrawIndicator(NametagRenderingKt.canDrawIndicator(entity));
+        PolyNametag.INSTANCE.setShouldDrawIndicator(NametagRenderingKt.canDrawIndicator(entity));
         if (!PolyNametag.INSTANCE.getDrawingTags() && PolyNametag.INSTANCE.getDrawingWorld()) {
             PolyNametag.INSTANCE.getNametags().add(new PolyNametag.NameInfo((RendererLivingEntity<EntityLivingBase>) (Object) this, entity, x, y, z));
             ci.cancel();
@@ -122,8 +123,8 @@ public abstract class RendererLivingEntityMixin  {
         if (!ModConfig.INSTANCE.enabled) return;
         PolyNametag instance = PolyNametag.INSTANCE;
         if (instance.isEssential() && instance.getShouldDrawIndicator()) {
-            //NametagRenderingKt.drawIndicator(entity, entity.getDisplayName().getFormattedText());
-            //instance.setShouldDrawIndicator(false);
+            NametagRenderingKt.drawIndicator(entity, entity.getDisplayName().getFormattedText(), (((int) OpenGlHelper.lastBrightnessY) << 16) + (int) OpenGlHelper.lastBrightnessX);
+            instance.setShouldDrawIndicator(false);
         }
     }
 }
