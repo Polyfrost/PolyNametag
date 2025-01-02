@@ -51,13 +51,17 @@ object NametagRenderer {
 
     @JvmStatic
     fun renderAll() {
-        if (!PolyNametagConfig.enabled) {
+//        if (!PolyNametagConfig.enabled) {
+//            println("Nametags are disabled")
+//            return
+//        }
+
+        if (nametags.isEmpty()) {
+            println("No nametags to render")
             return
         }
 
-        if (nametags.isEmpty()) {
-            return
-        }
+        println("Rendering ${nametags.size} nametags:\n${nametags.joinToString("\n")}")
 
         GlStateManager.pushMatrix()
         isCurrentlyDrawingTags = true

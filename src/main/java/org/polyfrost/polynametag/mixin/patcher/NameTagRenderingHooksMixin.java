@@ -22,7 +22,10 @@ public abstract class NameTagRenderingHooksMixin {
         cancellable = true
     )
     private static void polyNametag$overwritePatcherDrawString(FontRenderer fontRenderer, String text, int x, int y, int color, CallbackInfoReturnable<Integer> cir) {
-        if (!PolyNametagConfig.INSTANCE.enabled) return;
+        if (!PolyNametagConfig.INSTANCE.getEnabled()) {
+            return;
+        }
+
         cir.setReturnValue(NametagRenderingKt.drawStringWithoutZFighting(fontRenderer, text, x, y, color));
     }
 }

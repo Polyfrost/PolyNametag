@@ -1,18 +1,14 @@
 package org.polyfrost.polynametag
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.OpenGlHelper
-import net.minecraft.client.renderer.entity.Render
-import net.minecraft.client.renderer.entity.RendererLivingEntity
-import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityLivingBase
+//#if FORGE
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
+//#else
+//$$ import net.fabricmc.api.ClientModInitializer
+//#endif
+
 import org.polyfrost.oneconfig.api.platform.v1.Platform
-import org.polyfrost.polynametag.mixin.MinecraftAccessor
-import org.polyfrost.polynametag.mixin.RenderAccessor
 
 //#if FORGE
 @Mod(modid = PolyNametag.ID, version = PolyNametag.VERSION, name = PolyNametag.NAME, modLanguageAdapter = "org.polyfrost.oneconfig.utils.v1.forge.KotlinLanguageAdapter")
@@ -23,9 +19,9 @@ object PolyNametag
     //#endif
 {
 
-    const val ID = "@ID@"
-    const val NAME = "@NAME@"
-    const val VERSION = "@VER@"
+    const val ID = "@MOD_ID@"
+    const val NAME = "@MOD_NAME@"
+    const val VERSION = "@MOD_VERSION@"
 
     var isPatcher = false
         private set

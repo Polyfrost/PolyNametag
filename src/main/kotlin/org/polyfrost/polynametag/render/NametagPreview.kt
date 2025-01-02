@@ -1,16 +1,5 @@
 package org.polyfrost.polynametag.render
 
-import net.minecraft.client.renderer.OpenGlHelper
-import net.minecraft.client.renderer.RenderHelper
-import net.minecraft.client.renderer.entity.RendererLivingEntity
-import net.minecraft.entity.EntityLivingBase
-import net.minecraftforge.client.event.GuiScreenEvent
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import org.lwjgl.opengl.GL11
-import kotlin.math.atan
-import net.minecraft.client.renderer.GlStateManager as GL
-
 /*
 
 class NametagPreview(

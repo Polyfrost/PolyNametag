@@ -28,7 +28,7 @@ public abstract class RendererLivingEntityMixin  {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isGuiEnabled()Z")
     )
     private boolean gui() {
-        shouldShowOwnNametag = ((PolyNametagConfig.INSTANCE.getEnabled() && PolyNametagConfig.INSTANCE.getShowOwnNametag() && (PolyNametagConfig.INSTANCE.getShowInInventory() || !NametagRenderer.isCurrentlyDrawingInventory()) && (!NametagRenderer.isCurrentlyDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) || PolyNametagConfig.INSTANCE.getNametagPreview().getDrawing());
+        shouldShowOwnNametag = ((PolyNametagConfig.INSTANCE.getEnabled() && PolyNametagConfig.INSTANCE.getShowOwnNametag() && (PolyNametagConfig.INSTANCE.getShowInInventory() || !NametagRenderer.isCurrentlyDrawingInventory()) && (!NametagRenderer.isCurrentlyDrawingWorld() || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0))); //|| PolyNametagConfig.INSTANCE.getNametagPreview().getDrawing());
         return shouldShowOwnNametag || Minecraft.isGuiEnabled();
     }
 
@@ -105,7 +105,7 @@ public abstract class RendererLivingEntityMixin  {
         }
 
         if (NametagRenderer.isDrawingIndicator() && PolyNametagConfig.INSTANCE.getEssentialOffset()) GlStateManager.translate(5f, 0f, 0f);
-        NametagRenderingKt.drawFrontBackground(entity.getDisplayName().getFormattedText(), PolyNametagConfig.INSTANCE.getBackgroundColor().getRed(), PolyNametagConfig.INSTANCE.getBackgroundColor().getGreen(), PolyNametagConfig.INSTANCE.getBackgroundColor().getBlue(), NametagRenderingKt.getBackBackgroundAlpha(), entity);
+        NametagRenderingKt.drawFrontBackground(entity.getDisplayName().getFormattedText(), PolyNametagConfig.INSTANCE.getBackgroundColor().red(), PolyNametagConfig.INSTANCE.getBackgroundColor().green(), PolyNametagConfig.INSTANCE.getBackgroundColor().blue(), NametagRenderingKt.getBackBackgroundAlpha(), entity);
     }
 
     @Redirect(
