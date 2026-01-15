@@ -1,14 +1,10 @@
 package org.polyfrost.polynametag.client
 
-import club.sk1er.patcher.config.OldPatcherConfig
-import club.sk1er.patcher.config.PatcherConfig
 import org.polyfrost.oneconfig.api.config.v1.Config
-import org.polyfrost.oneconfig.api.config.v1.Property
 import org.polyfrost.oneconfig.api.config.v1.annotations.Color
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
-import org.polyfrost.oneconfig.api.ui.v1.Notifications
 import org.polyfrost.polynametag.PolyNametagConstants
 import org.polyfrost.polyui.color.rgba
 
@@ -19,9 +15,9 @@ object PolyNametagConfig :
     var isEnabled = true
 
     @JvmStatic
-    @Slider(title = "Height offset", min = -0.5F, max = 0.5F, description = "How much to offset the nametag vertically")
+    @Slider(title = "Height offset", min = -10F, max = 10F, description = "How much to offset the nametag vertically")
     var heightOffset = 0.0F
-        get() = field.coerceIn(-0.5F, 0.5F)
+        get() = field.coerceIn(-10F, 10F)
 
     @JvmStatic
     @Slider(title = "Scale", min = 0.0F, max = 1.0F, description = "How much to scale the nametag")
@@ -64,57 +60,57 @@ object PolyNametagConfig :
     @Color(title = "Text color", description = "The color of the text")
     var textColor = rgba(1, 1, 1, 1.0F)
 
-    private var hasMigratedPatcher = false
+//    private var hasMigratedPatcher = false
 
     init {
         addDependency("backgroundColor", "background")
-        addDependency("background", "Patcher's Disable Nametag Boxes. Please turn it off to use this feature.") {
-            if (PolyNametagClient.isPatcher && PatcherConfig.disableNametagBoxes) {
-                Property.Display.DISABLED
-            } else {
-                Property.Display.SHOWN
-            }
-        }
-        addDependency("isShowOwnNametag", "Patcher's Show Own Nametag. Please turn it off to use this feature.") {
-            if (PolyNametagClient.isPatcher && PatcherConfig.showOwnNametag) {
-                Property.Display.DISABLED
-            } else {
-                Property.Display.SHOWN
-            }
-        }
+//        addDependency("background", "Patcher's Disable Nametag Boxes. Please turn it off to use this feature.") {
+//            if (PolyNametagClient.isPatcher && PatcherConfig.disableNametagBoxes) {
+//                Property.Display.DISABLED
+//            } else {
+//                Property.Display.SHOWN
+//            }
+//        }
+//        addDependency("isShowOwnNametag", "Patcher's Show Own Nametag. Please turn it off to use this feature.") {
+//            if (PolyNametagClient.isPatcher && PatcherConfig.showOwnNametag) {
+//                Property.Display.DISABLED
+//            } else {
+//                Property.Display.SHOWN
+//            }
+//        }
         addDependency("cornerRadius", "rounded")
         addDependency("isShowInInventory", "isShowOwnNametag")
 
-        if (!hasMigratedPatcher) {
-            try {
-                Class.forName("club.sk1er.patcher.config.OldPatcherConfig")
-                var didAnything = false
-                if (OldPatcherConfig.shadowedNametagText) {
-                    textType = 1
-                    didAnything = true
-                }
-                if (OldPatcherConfig.disableNametagBoxes) {
-                    background = false
-                    didAnything = true
-                }
-                if (OldPatcherConfig.showOwnNametag) {
-                    isShowOwnNametag = true
-                    didAnything = true
-                }
-
-                hasMigratedPatcher = true
-                save()
-
-                if (didAnything) {
-                    Notifications.enqueue(
-                        Notifications.Type.Info,
-                        "PolyNametag",
-                        "Migrated Patcher settings replaced by PolyNametag. Please check PolyNametag's settings to make sure they are correct."
-                    )
-                }
-            } catch (_: ClassNotFoundException) {
-
-            }
-        }
+//        if (!hasMigratedPatcher) {
+//            try {
+//                Class.forName("club.sk1er.patcher.config.OldPatcherConfig")
+//                var didAnything = false
+//                if (OldPatcherConfig.shadowedNametagText) {
+//                    textType = 1
+//                    didAnything = true
+//                }
+//                if (OldPatcherConfig.disableNametagBoxes) {
+//                    background = false
+//                    didAnything = true
+//                }
+//                if (OldPatcherConfig.showOwnNametag) {
+//                    isShowOwnNametag = true
+//                    didAnything = true
+//                }
+//
+//                hasMigratedPatcher = true
+//                save()
+//
+//                if (didAnything) {
+//                    Notifications.enqueue(
+//                        Notifications.Type.Info,
+//                        "PolyNametag",
+//                        "Migrated Patcher settings replaced by PolyNametag. Please check PolyNametag's settings to make sure they are correct."
+//                    )
+//                }
+//            } catch (_: ClassNotFoundException) {
+//
+//            }
+//        }
     }
 }

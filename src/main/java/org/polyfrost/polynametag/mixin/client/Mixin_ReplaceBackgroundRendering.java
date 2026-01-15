@@ -2,63 +2,48 @@ package org.polyfrost.polynametag.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import dev.deftu.omnicore.api.client.render.stack.OmniMatrixStacks;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.entity.Entity;
+//? if <= 1.21.8
+/*import com.llamalad7.mixinextras.sugar.Local;*/
+import com.mojang.blaze3d.vertex.PoseStack;
+import dev.deftu.omnicore.api.client.render.stack.OmniPoseStacks;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+//? if <= 1.21.8
+/*import net.minecraft.client.renderer.entity.EntityRenderer;*/
+//? if >= 1.21.10
+import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
+import net.minecraft.network.chat.Component;
+//? if 1.21.1
+/*import net.minecraft.world.entity.Entity;*/
+import org.joml.Matrix4f;
 import org.polyfrost.polynametag.client.NametagRenderer;
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(Render.class)
-public abstract class Mixin_ReplaceBackgroundRendering {
-    // TODO: Replace w/WrapWithCondition once Wyvest unfucks MixinExtras in 1.8
-    @WrapOperation(method = "renderLivingLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;begin(ILnet/minecraft/client/renderer/vertex/VertexFormat;)V"))
-    private void polynametag$cancelBegin(WorldRenderer instance, int glMode, VertexFormat format, Operation<Void> original) {
-        if (!PolyNametagConfig.isEnabled()) {
-            original.call(instance, glMode, format);
-        }
-    }
-
-    @WrapOperation(method = "renderLivingLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;pos(DDD)Lnet/minecraft/client/renderer/WorldRenderer;"))
-    private WorldRenderer polynametag$cancelPos(WorldRenderer instance, double x, double y, double z, Operation<WorldRenderer> original) {
+//? if >= 1.21.10 {
+@Mixin(NameTagFeatureRenderer.class)
+//?} else {
+/*@Mixin(EntityRenderer.class)
+*///?}
+public abstract class Mixin_ReplaceBackgroundRendering/*? if 1.21.1 {*//*<T extends Entity>*//*?}*/ {
+    @WrapOperation(method = /*? if >= 1.21.10 {*/ "render" /*?} else {*/ /*"renderNameTag" *//*?}*/, at = @At(value = "INVOKE", target = /*? if >=1.21.8 {*/ "Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/network/chat/Component;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)V" /*?} else {*/ /*"Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/network/chat/Component;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)I" *//*?}*/, ordinal = 0))
+    private /*? if >= 1.21.8 {*/ void /*?} else {*/ /*int *//*?}*/ renderCustomBackground(Font instance, Component component, float x, float y, int color, boolean shadow, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int backgroundColor, int packedLight, Operation</*? if >= 1.21.8 {*/ Void/*?} else {*//*Integer*//*?}*/> original /*? if <= 1.21.8 {*//*, @Local(argsOnly = true) PoseStack pose *//*?}*/ /*? if 1.21.1 {*//*, @Local(argsOnly = true) T entity *//*?}*/) {
         if (PolyNametagConfig.isEnabled()) {
-            return instance;
+            //? if >= 1.21.10 {
+            PoseStack pose = new PoseStack();
+            pose.pushPose();
+            pose.mulPose(matrix4f);
+            //?}
+            NametagRenderer.drawBackground(OmniPoseStacks.vanilla(pose), /*? if >= 1.21.8 {*/ component /*?} else {*/ /*entity *//*?}*/);
+            //? if >= 1.21.10
+            pose.popPose();
+            //? if 1.21.1
+            /*return 0;*/
         } else {
-            return original.call(instance, x, y, z);
-        }
-    }
-
-    @WrapOperation(method = "renderLivingLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;color(FFFF)Lnet/minecraft/client/renderer/WorldRenderer;"))
-    private WorldRenderer polynametag$cancelColor(WorldRenderer instance, float red, float green, float blue, float alpha, Operation<WorldRenderer> original) {
-        if (PolyNametagConfig.isEnabled()) {
-            return instance;
-        } else {
-            return original.call(instance, red, green, blue, alpha);
-        }
-    }
-
-    @WrapOperation(method = "renderLivingLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;endVertex()V"))
-    private void polynametag$cancelEndVertex(WorldRenderer instance, Operation<Void> original) {
-        if (!PolyNametagConfig.isEnabled()) {
-            original.call(instance);
-        }
-    }
-
-    @WrapOperation(method = "renderLivingLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()V"))
-    private void polynametag$replaceBackgroundRendering(
-            Tessellator instance,
-            Operation<Void> original,
-            @Local(argsOnly = true) Entity entity
-    ) {
-        if (PolyNametagConfig.isEnabled()) {
-            NametagRenderer.drawBackground(OmniMatrixStacks.create(), entity);
-        } else {
-            original.call(instance);
+            //? if 1.21.1
+            /*return*/
+            original.call(instance, component, x, y, color, shadow, matrix4f, multiBufferSource, displayMode, backgroundColor, packedLight);
         }
     }
 }

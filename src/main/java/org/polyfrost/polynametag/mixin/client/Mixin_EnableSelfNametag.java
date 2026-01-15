@@ -1,22 +1,21 @@
 package org.polyfrost.polynametag.mixin.client;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
-import net.minecraft.entity.Entity;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import dev.deftu.omnicore.api.client.OmniClient;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.world.entity.LivingEntity;
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(RendererLivingEntity.class)
-public abstract class Mixin_EnableSelfNametag {
-    @WrapOperation(method = "canRenderName(Lnet/minecraft/entity/EntityLivingBase;)Z", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/RenderManager;livingPlayer:Lnet/minecraft/entity/Entity;"))
-    private Entity polynametag$enableSelfNametag(RenderManager instance, Operation<Entity> original) {
-        if (PolyNametagConfig.isEnabled() && PolyNametagConfig.isShowOwnNametag()) {
-            return null;
+@Mixin(LivingEntityRenderer.class)
+public abstract class Mixin_EnableSelfNametag<T extends LivingEntity> {
+    @ModifyReturnValue(method = /*? if >=1.21.8 {*/ "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z" /*?} else {*/ /*"shouldShowName(Lnet/minecraft/world/entity/LivingEntity;)Z" *//*?}*/, at = @At("RETURN"))
+    private boolean enableSelfNametag(boolean original, T livingEntity) {
+        if (PolyNametagConfig.isEnabled() && PolyNametagConfig.isShowOwnNametag() && livingEntity == OmniClient.getPlayer()) {
+            return true;
         } else {
-            return original.call(instance);
+            return original;
         }
     }
 }

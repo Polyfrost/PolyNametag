@@ -2,35 +2,48 @@ package org.polyfrost.polynametag.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import dev.deftu.omnicore.api.client.render.stack.OmniMatrixStacks;
+//? if <= 1.21.8
+/*import com.llamalad7.mixinextras.sugar.Local;*/
+import com.mojang.blaze3d.vertex.PoseStack;
+import dev.deftu.omnicore.api.client.render.stack.OmniPoseStacks;
 import dev.deftu.omnicore.api.color.ColorFormat;
 import dev.deftu.omnicore.api.color.OmniColor;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+//? if <= 1.21.8
+/*import net.minecraft.client.renderer.entity.EntityRenderer;*/
+//? if >= 1.21.10
+import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
+import net.minecraft.network.chat.Component;
+import org.joml.Matrix4f;
 import org.polyfrost.polynametag.client.NametagRenderer;
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(Render.class)
+//? if >= 1.21.10 {
+@Mixin(NameTagFeatureRenderer.class)
+//?} else {
+/*@Mixin(EntityRenderer.class)
+*///?}
 public abstract class Mixin_ReplaceTextRendering {
-    @WrapOperation(method = "renderLivingLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
-    private int polynametag$replaceTextRendering(
-            FontRenderer instance,
-            String text,
-            int x,
-            int y,
-            int inColor,
-            Operation<Integer> original,
-            @Local(argsOnly = true) Entity entity
-    ) {
+    @WrapOperation(method = /*? if >= 1.21.10 {*/ "render" /*?} else {*/ /*"renderNameTag" *//*?}*/, at = @At(value = "INVOKE", target = /*? if >=1.21.8 {*/ "Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/network/chat/Component;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)V" /*?} else {*/ /*"Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/network/chat/Component;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)I" *//*?}*/, ordinal = 1))
+    private /*? if >= 1.21.8 {*/ void /*?} else {*/ /*int *//*?}*/ replaceText(Font instance, Component component, float x, float y, int color, boolean shadow, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int backgroundColor, int packedLight, Operation</*? if >= 1.21.8 {*/ Void/*?} else {*//*Integer*//*?}*/> original /*? if <= 1.21.8 {*//*, @Local(argsOnly = true) PoseStack pose *//*?}*/) {
         if (PolyNametagConfig.isEnabled()) {
-            final OmniColor color = new OmniColor(ColorFormat.ARGB, PolyNametagConfig.INSTANCE.getTextColor().getArgb()).withAlpha(entity.isSneaking() ? 32 : 255);
-            return NametagRenderer.drawNametagString(OmniMatrixStacks.create(), text, x, y, color);
+            //? if >= 1.21.10 {
+            PoseStack pose = new PoseStack();
+            pose.pushPose();
+            pose.mulPose(matrix4f);
+            //?}
+            NametagRenderer.drawNametagString(OmniPoseStacks.vanilla(pose), component, x, y, new OmniColor(ColorFormat.ARGB, color));
+            //? if >= 1.21.10
+            pose.popPose();
+            //? if 1.21.1
+            /*return 0;*/
         } else {
-            return original.call(instance, text, x, y, inColor);
+            //? if 1.21.1
+            /*return*/
+            original.call(instance, component, x, y, color, shadow, matrix4f, multiBufferSource, displayMode, backgroundColor, packedLight);
         }
     }
 }

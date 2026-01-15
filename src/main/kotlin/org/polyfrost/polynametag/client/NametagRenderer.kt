@@ -4,14 +4,12 @@ import dev.deftu.omnicore.api.client.render.OmniTextRenderer
 import dev.deftu.omnicore.api.client.render.TextShadowType
 import dev.deftu.omnicore.api.client.render.pipeline.OmniRenderPipeline
 import dev.deftu.omnicore.api.client.render.pipeline.OmniRenderPipelines
-import dev.deftu.omnicore.api.client.render.stack.OmniMatrixStack
+import dev.deftu.omnicore.api.client.render.stack.OmniPoseStack
 import dev.deftu.omnicore.api.client.render.vertex.roundedQuad
 import dev.deftu.omnicore.api.color.OmniColor
 import dev.deftu.omnicore.api.color.OmniColors
-import gg.essential.universal.UMatrixStack
-import net.minecraft.client.entity.AbstractClientPlayer
-import net.minecraft.entity.Entity
-import org.polyfrost.polynametag.client.render.EssentialBSManager
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.Entity
 
 object NametagRenderer {
     private val PIPELINE by lazy {
@@ -22,12 +20,9 @@ object NametagRenderer {
             .build()
     }
 
-    var isDrawingIndicator = false
-    private val essentialBSManager = EssentialBSManager()
-
     @JvmStatic
     fun drawBackground(
-        matrices: OmniMatrixStack,
+        matrices: OmniPoseStack,
         x1: Double, x2: Double,
         leftPad: Float = 0.0F,
     ) {
@@ -58,13 +53,13 @@ object NametagRenderer {
 
             val buffer = PIPELINE.createBufferBuilder()
             buffer.roundedQuad(
-                stack = matrices,
+                pose = matrices,
                 x = (-halfWidth).toDouble(),
-                y = (-halfHeight).toDouble(),
+                y = (-halfHeight).toDouble() - PolyNametagConfig.heightOffset,
                 width = (halfWidth * 2.0F).toDouble(),
                 height = (halfHeight * 2.0F).toDouble(),
-                radius = radius,
                 color = color,
+                radius = radius,
                 segmentScale = 1.5
             )
             buffer.buildOrNull()?.drawAndClose(PIPELINE)
@@ -73,67 +68,50 @@ object NametagRenderer {
 
     @JvmStatic
     fun drawBackground(
-        matrices: OmniMatrixStack,
+        matrices: OmniPoseStack,
         entity: Entity,
     ) {
         val displayName = entity.displayName ?: return
-        val halfWidth = OmniTextRenderer.width(
-            //#if MC >= 1.16.5
-            //$$ displayName.string
-            //#else
-            displayName.formattedText
-            //#endif
-        ) / 2 + 1.0
-        val leftPad = if (canDrawEssentialIndicator(entity)) 10.0F else 0.0F
+        val halfWidth = OmniTextRenderer.width(displayName.string) / 2 + 1.0
+        val leftPad = 0.0F
         drawBackground(matrices, -halfWidth, halfWidth, leftPad)
     }
 
-    //#if MC >=1.21.2
-    //$$ @JvmStatic
-    //$$ fun drawBackground(
-    //$$     matrices: OmniMatrixStack,
-    //#if MC >=1.21.4
-    //$$     displayName: net.minecraft.network.chat.Component?,
-    //#else
-    //$$     displayName: net.minecraft.text.Text?,
-    //#endif
-    //$$ ) {
-    //$$     val displayName = displayName ?: return
-    //$$     val halfWidth = OmniTextRenderer.width(displayName.string) / 2 + 1.0
-    //$$     drawBackground(matrices, -halfWidth, halfWidth)
-    //$$ }
-    //#endif
+    //? if >= 1.21.2 {
+    @JvmStatic
+    fun drawBackground(
+        matrices: OmniPoseStack,
+    //? if >= 1.21.4 {
+        displayName: Component?,
+    //?} else {
+        /*displayName: net.minecraft.text.Text?,
+    *///?}
+    ) {
+        val displayName = displayName ?: return
+        val halfWidth = OmniTextRenderer.width(displayName.string) / 2 + 1.0
+        drawBackground(matrices, -halfWidth, halfWidth)
+    }
+    //?}
 
     @JvmStatic
     fun drawNametagString(
-        matrices: OmniMatrixStack,
-        text: String,
+        matrices: OmniPoseStack,
+        text: Component,
         x: Float, y: Float,
         color: OmniColor,
     ): Int {
         return matrices.with {
             matrices.translate(0.0F, 0.0F, -0.01F)
-            OmniTextRenderer.render(
-                matrices, text, x, y, color, when (PolyNametagConfig.textType) {
+            val render = OmniTextRenderer.render(
+                matrices, text/*? if !=1.21.8 {*/.string /*?}*/, x, y, color, // TODO: make it not a string!
+                when (PolyNametagConfig.textType) {
                     0 -> TextShadowType.None
                     1 -> TextShadowType.Drop
                     2 -> TextShadowType.Outline(OmniColors.BLACK.withAlpha(color.alpha))
                     else -> throw IllegalStateException("Unexpected value: ${PolyNametagConfig.textType}")
                 }
             )
+            render
         }
-    }
-
-    fun drawIndicator(entity: Entity, string: String, light: Int) {
-        if (entity is AbstractClientPlayer) {
-            isDrawingIndicator = true
-            essentialBSManager.drawIndicator(UMatrixStack(), entity, string, light)
-            isDrawingIndicator = false
-        }
-    }
-
-    @JvmStatic
-    fun canDrawEssentialIndicator(entity: Entity): Boolean {
-        return essentialBSManager.canDrawIndicator(entity)
     }
 }

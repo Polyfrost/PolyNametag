@@ -1,24 +1,18 @@
 {
-	"compatibilityLevel": "JAVA_8",
+	"compatibilityLevel": "JAVA_21",
 	"minVersion": "0.7",
 	"package": "org.polyfrost.polynametag.mixin",
-	"refmap": "mixins.polynametag.refmap.json",
 	"injectors": {
 		"maxShiftBy": 5
 	},
 	"client": [
 		"client.Mixin_ApplyScaling",
 		"client.Mixin_EnableSelfNametag",
-		"client.Mixin_FixNametagRotation",
 		"client.Mixin_FixSneakingNametag",
 		"client.Mixin_OffsetRendering",
 		"client.Mixin_ReplaceBackgroundRendering",
 		"client.Mixin_ReplaceTextRendering",
-		"client.Mixin_ShowInInventory",
-		"client.essential.Mixin_EssentialIndicatorCompatibility",
-		"client.levelhead.Mixin_FixLevelheadRendering",
-		"client.levelhead.Mixin_UseCustomConfigArgs",
-		"client.patcher.Mixin_OverwritePatcherNametagTextRendering"
+		"client.Mixin_ShowInInventory"
 	],
 	"verbose": true
 }
