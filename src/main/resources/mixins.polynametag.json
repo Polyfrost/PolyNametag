@@ -7,9 +7,12 @@
 	},
 	"client": [
 		"client.Mixin_ApplyScaling",
+		"client.Mixin_ApplyTextShadow",
 		"client.Mixin_EnableSelfNametag",
 		"client.Mixin_FixSneakingNametag",
 		"client.Mixin_OffsetRendering",
+		"client.Mixin_RemoveNametags",
+		"client.Mixin_RenderBackgroundShape",
 		"client.Mixin_ReplaceBackgroundRendering",
 		"client.Mixin_ReplaceTextRendering",
 		"client.Mixin_ShowInInventory"

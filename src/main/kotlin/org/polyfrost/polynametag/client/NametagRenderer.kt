@@ -1,117 +1,161 @@
 package org.polyfrost.polynametag.client
 
-import dev.deftu.omnicore.api.client.render.OmniTextRenderer
-import dev.deftu.omnicore.api.client.render.TextShadowType
-import dev.deftu.omnicore.api.client.render.pipeline.OmniRenderPipeline
-import dev.deftu.omnicore.api.client.render.pipeline.OmniRenderPipelines
-import dev.deftu.omnicore.api.client.render.stack.OmniPoseStack
-import dev.deftu.omnicore.api.client.render.vertex.roundedQuad
-import dev.deftu.omnicore.api.color.OmniColor
-import dev.deftu.omnicore.api.color.OmniColors
-import net.minecraft.network.chat.Component
+import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 object NametagRenderer {
-    private val PIPELINE by lazy {
-        OmniRenderPipelines.POSITION_COLOR_TRIANGLES
-            .newBuilder()
-            .setDepthTest(OmniRenderPipeline.DepthTest.LESS)
-            .setDepthMask(false)
-            .build()
+    private const val CORNER_SEGMENTS = 8
+
+    const val BACKGROUND_DEPTH = -0.01F
+
+
+    @JvmStatic
+    fun useCustomBackground(): Boolean {
+        if (!PolyNametagConfig.isEnabled || !PolyNametagConfig.background) {
+            return false
+        }
+        return PolyNametagConfig.rounded || PolyNametagConfig.paddingX > 0.0F || PolyNametagConfig.paddingY > 0.0F
     }
 
     @JvmStatic
-    fun drawBackground(
-        matrices: OmniPoseStack,
-        x1: Double, x2: Double,
-        leftPad: Float = 0.0F,
-    ) {
-        if (!PolyNametagConfig.background) {
-            return
+    fun backgroundArgb(): Int = colorToArgb(
+        PolyNametagConfig.backgroundColor.redF,
+        PolyNametagConfig.backgroundColor.greenF,
+        PolyNametagConfig.backgroundColor.blueF,
+        PolyNametagConfig.backgroundColor.alphaF
+    )
+
+    @JvmStatic
+    fun backgroundQuads(x: Float, y: Float, width: Float): FloatArray {
+        val x0 = x - 1.0F - PolyNametagConfig.paddingX
+        val x1 = x + width + PolyNametagConfig.paddingX
+        val y0 = y - 1.0F - PolyNametagConfig.paddingY
+        val y1 = y + 9.0F + PolyNametagConfig.paddingY
+
+        val radius = if (PolyNametagConfig.rounded) {
+            min(PolyNametagConfig.cornerRadius, min((x1 - x0) / 2.0F, (y1 - y0) / 2.0F))
+        } else {
+            0.0F
         }
 
-        matrices.with {
-            val baselineY = 3.5F
-            val realX1 = (x1.toFloat() - leftPad)
-            val realX2 = x2.toFloat()
-            val span = (realX2 - realX1).coerceAtLeast(0.0F)
-            if (span <= 0.0F) {
-                return@with
-            }
-
-            val centerX = (realX1 + realX2) / 2.0F
-            matrices.translate(centerX, baselineY, 0.01F)
-            val color = PolyNametagConfig.backgroundColor.let { c -> OmniColor(c.r, c.g, c.b, c.a) }
-            val halfWidth = (span / 2.0F) + PolyNametagConfig.paddingX.coerceIn(0.0F, 10.0F)
-            val halfHeight = 4.5F + PolyNametagConfig.paddingY.coerceIn(0.0F, 10.0F)
-            val radius = if (PolyNametagConfig.rounded) {
-                PolyNametagConfig.cornerRadius
-                    .coerceIn(0.0F, 10.0F)
-                    .coerceAtMost(halfWidth)
-                    .coerceAtMost(halfHeight)
-            } else 0.0F
-
-            val buffer = PIPELINE.createBufferBuilder()
-            buffer.roundedQuad(
-                pose = matrices,
-                x = (-halfWidth).toDouble(),
-                y = (-halfHeight).toDouble() - PolyNametagConfig.heightOffset,
-                width = (halfWidth * 2.0F).toDouble(),
-                height = (halfHeight * 2.0F).toDouble(),
-                color = color,
-                radius = radius,
-                segmentScale = 1.5
+        if (radius <= 0.0F) {
+            return floatArrayOf(
+                x0, y1,
+                x1, y1,
+                x1, y0,
+                x0, y0
             )
-            buffer.buildOrNull()?.drawAndClose(PIPELINE)
+        }
+
+        val perimeter = ArrayList<Float>((CORNER_SEGMENTS + 1) * 4 * 2)
+        addArc(perimeter, x0 + radius, y0 + radius, radius, Math.PI, Math.PI * 1.5)          // top-left
+        addArc(perimeter, x1 - radius, y0 + radius, radius, Math.PI * 1.5, Math.PI * 2.0)    // top-right
+        addArc(perimeter, x1 - radius, y1 - radius, radius, 0.0, Math.PI * 0.5)              // bottom-right
+        addArc(perimeter, x0 + radius, y1 - radius, radius, Math.PI * 0.5, Math.PI)          // bottom-left
+
+        val cx = (x0 + x1) / 2.0F
+        val cy = (y0 + y1) / 2.0F
+        val pointCount = perimeter.size / 2
+        val out = FloatArray(pointCount * 8)
+        var o = 0
+        for (i in 0 until pointCount) {
+            val ax = perimeter[i * 2]
+            val ay = perimeter[i * 2 + 1]
+            val n = (i + 1) % pointCount
+            val bx = perimeter[n * 2]
+            val by = perimeter[n * 2 + 1]
+            out[o++] = cx; out[o++] = cy
+            out[o++] = bx; out[o++] = by
+            out[o++] = ax; out[o++] = ay
+            out[o++] = ax; out[o++] = ay
+        }
+        return out
+    }
+
+    private fun addArc(into: ArrayList<Float>, cx: Float, cy: Float, radius: Float, start: Double, end: Double) {
+        for (s in 0..CORNER_SEGMENTS) {
+            val angle = start + (end - start) * s / CORNER_SEGMENTS
+            into.add(cx + radius * cos(angle).toFloat())
+            into.add(cy + radius * sin(angle).toFloat())
         }
     }
 
     @JvmStatic
-    fun drawBackground(
-        matrices: OmniPoseStack,
-        entity: Entity,
-    ) {
-        val displayName = entity.displayName ?: return
-        val halfWidth = OmniTextRenderer.width(displayName.string) / 2 + 1.0
-        val leftPad = 0.0F
-        drawBackground(matrices, -halfWidth, halfWidth, leftPad)
-    }
+    fun textColor(original: Int): Int {
+        if (!PolyNametagConfig.isEnabled) {
+            return original
+        }
 
-    //? if >= 1.21.2 {
-    @JvmStatic
-    fun drawBackground(
-        matrices: OmniPoseStack,
-    //? if >= 1.21.4 {
-        displayName: Component?,
-    //?} else {
-        /*displayName: net.minecraft.text.Text?,
-    *///?}
-    ) {
-        val displayName = displayName ?: return
-        val halfWidth = OmniTextRenderer.width(displayName.string) / 2 + 1.0
-        drawBackground(matrices, -halfWidth, halfWidth)
-    }
-    //?}
-
-    @JvmStatic
-    fun drawNametagString(
-        matrices: OmniPoseStack,
-        text: Component,
-        x: Float, y: Float,
-        color: OmniColor,
-    ): Int {
-        return matrices.with {
-            matrices.translate(0.0F, 0.0F, -0.01F)
-            val render = OmniTextRenderer.render(
-                matrices, text/*? if !=1.21.8 {*/.string /*?}*/, x, y, color, // TODO: make it not a string!
-                when (PolyNametagConfig.textType) {
-                    0 -> TextShadowType.None
-                    1 -> TextShadowType.Drop
-                    2 -> TextShadowType.Outline(OmniColors.BLACK.withAlpha(color.alpha))
-                    else -> throw IllegalStateException("Unexpected value: ${PolyNametagConfig.textType}")
-                }
-            )
-            render
+        val color = colorToArgb(
+            PolyNametagConfig.textColor.redF,
+            PolyNametagConfig.textColor.greenF,
+            PolyNametagConfig.textColor.blueF,
+            PolyNametagConfig.textColor.alphaF
+        )
+        val originalAlpha = original ushr 24
+        return if (originalAlpha in 1..254) {
+            color.withAlpha((color ushr 24).coerceAtMost(originalAlpha))
+        } else {
+            color
         }
     }
+
+    @JvmStatic
+    fun backgroundColor(original: Int): Int {
+        if (!PolyNametagConfig.isEnabled) {
+            return original
+        }
+
+        if (!PolyNametagConfig.background || original == 0) {
+            return 0
+        }
+
+        val color = colorToArgb(
+            PolyNametagConfig.backgroundColor.redF,
+            PolyNametagConfig.backgroundColor.greenF,
+            PolyNametagConfig.backgroundColor.blueF,
+            PolyNametagConfig.backgroundColor.alphaF
+        )
+        val originalAlpha = original ushr 24
+        return if (originalAlpha in 1..32) {
+            color.withAlpha((color ushr 24).coerceAtMost(originalAlpha))
+        } else {
+            color
+        }
+    }
+
+    @JvmStatic
+    fun textShadow(original: Boolean): Boolean {
+        if (!PolyNametagConfig.isEnabled) {
+            return original
+        }
+
+        return PolyNametagConfig.textType != 0
+    }
+
+    @JvmStatic
+    fun currentPlayer(): Entity? = Minecraft.getInstance().player
+
+    @JvmStatic
+    fun isInventoryScreenOpen(): Boolean {
+        val screen = Minecraft.getInstance().screen
+        return screen is net.minecraft.client.gui.screens.inventory.InventoryScreen ||
+            screen is net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+    }
+
+    private fun colorToArgb(r: Float, g: Float, b: Float, a: Float): Int {
+        val alpha = channel(a)
+        val red = channel(r)
+        val green = channel(g)
+        val blue = channel(b)
+        return (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+    }
+
+    private fun channel(value: Float): Int = (value.coerceIn(0.0F, 1.0F) * 255.0F).roundToInt()
+
+    private fun Int.withAlpha(alpha: Int): Int = (this and 0x00FFFFFF) or (alpha.coerceIn(0, 255) shl 24)
 }
