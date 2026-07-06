@@ -65,11 +65,14 @@ object PolyNametagConfig :
     @Color(title = "Text color", description = "The color of the text")
     var textColor = PolyColor(0xFFFFFFFF.toInt())
 
+    @Switch(title = "Override text color", description = "Force the text color above, ignoring color codes and team/rank colors in the name")
+    var overrideTextColor = false
+
     @Switch(title = "Rounded Corners", description = "Round the corners of the background")
     var rounded = false
 
     @Slider(title = "Corner Radius", min = 0.0F, max = 10.0F, description = "The radius of the rounded corners", step = 1f)
-    var cornerRadius = 0.0F
+    var cornerRadius = 3.0F
         get() = field.coerceIn(0.0F, 10.0F)
 
     @Slider(title = "Padding X", min = 0.0F, max = 10.0F, description = "Horizontal padding around the text", step = 1f)

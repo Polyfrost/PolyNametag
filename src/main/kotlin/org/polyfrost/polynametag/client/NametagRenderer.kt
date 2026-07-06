@@ -1,7 +1,13 @@
 package org.polyfrost.polynametag.client
 
 import net.minecraft.client.Minecraft
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.TextColor
+import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.phys.AABB
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -10,7 +16,10 @@ import kotlin.math.sin
 object NametagRenderer {
     private const val CORNER_SEGMENTS = 8
 
-    const val BACKGROUND_DEPTH = -0.01F
+    private const val HEAD_SEARCH_RADIUS = 0.75
+    private const val HEAD_SEARCH_TOP = 1.25
+
+    const val BACKGROUND_DEPTH = 0.01F
 
 
     @JvmStatic
@@ -105,6 +114,23 @@ object NametagRenderer {
     }
 
     @JvmStatic
+    fun overrideTextComponent(original: Component): Component {
+        if (!PolyNametagConfig.isEnabled || !PolyNametagConfig.overrideTextColor) {
+            return original
+        }
+        return stripColor(original)
+    }
+
+    private fun stripColor(component: Component): Component {
+        val result: MutableComponent = MutableComponent.create(component.contents)
+            .setStyle(component.style.withColor(null as TextColor?))
+        for (sibling in component.siblings) {
+            result.append(stripColor(sibling))
+        }
+        return result
+    }
+
+    @JvmStatic
     fun backgroundColor(original: Int): Int {
         if (!PolyNametagConfig.isEnabled) {
             return original
@@ -139,6 +165,26 @@ object NametagRenderer {
 
     @JvmStatic
     fun currentPlayer(): Entity? = Minecraft.getInstance().player
+
+    @JvmStatic
+    fun hasServerNametag(entity: Entity): Boolean {
+        val level = entity.level()
+        val box = AABB(
+            entity.x - HEAD_SEARCH_RADIUS,
+            entity.y + entity.bbHeight * 0.5,
+            entity.z - HEAD_SEARCH_RADIUS,
+            entity.x + HEAD_SEARCH_RADIUS,
+            entity.y + entity.bbHeight + HEAD_SEARCH_TOP,
+            entity.z + HEAD_SEARCH_RADIUS
+        )
+        return level.getEntities(entity, box) { it !== entity && isNametagEntity(it) }.isNotEmpty()
+    }
+
+    private fun isNametagEntity(entity: Entity): Boolean = when (entity) {
+        is Display.TextDisplay -> true
+        is ArmorStand -> entity.isCustomNameVisible && entity.customName != null
+        else -> false
+    }
 
     @JvmStatic
     fun isInventoryScreenOpen(): Boolean {

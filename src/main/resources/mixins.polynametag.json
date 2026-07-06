@@ -12,6 +12,7 @@
 		"client.Mixin_FixSneakingNametag",
 		"client.Mixin_OffsetRendering",
 		"client.Mixin_RemoveNametags",
+		"client.Mixin_RemoveNametagsAvatar",
 		"client.Mixin_RenderBackgroundShape",
 		"client.Mixin_ReplaceBackgroundRendering",
 		"client.Mixin_ReplaceTextRendering",
