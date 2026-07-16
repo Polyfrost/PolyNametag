@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("dev.kikugie.loom-back-compat")
-    id("org.jetbrains.kotlin.jvm") version "2.3.0"
+    id("org.jetbrains.kotlin.jvm") version "2.4.0"
     id("dev.deftu.gradle.bloom") version "0.2.0"
 }
 
@@ -13,7 +13,6 @@ val modversion = property("mod.version") as String
 val mcversion = property("minecraft_version") as String
 val versionrange = property("minecraft_version_range")
 val loaderversion = property("loader_version")
-val oneconfigVersion = "1.0.0-beta.4"
 
 base {
     archivesName.set("$modid-$modversion+$mcversion")
@@ -23,28 +22,36 @@ repositories {
     mavenCentral()
     gradlePluginPortal()
     google()
-
-    maven("https://maven.parchmentmc.org")
     maven("https://repo.polyfrost.org/releases")
     maven("https://repo.polyfrost.org/snapshots")
+    maven("https://maven.parchmentmc.org")
     maven("https://maven.gegy.dev/releases")
-
-    maven("https://maven.logix.dev/snapshots")
-    maven("https://nexus.prsm.wtf/repository/maven-public/maven-repo/releases/")
-    maven("https://repo.hypixel.net/repository/Hypixel/")
-    maven("https://maven.deftu.dev/releases")
-
-    maven("https://maven.fabricmc.net/releases")
-    maven("https://jitpack.io") {
-        content { includeGroupAndSubgroups("com.github") }
+    //maven("https://maven.terraformersmc.com/releases") {
+    maven("https://maven.gnomecraft.net/releases/") {
+        content {
+            includeGroup("com.terraformersmc")
+        }
     }
-    maven("https://maven.bawnorton.com/releases") {
-        content { includeGroup("com.github.bawnorton.mixinsquared") }
+    maven("https://central.sonatype.com/repository/maven-snapshots/") {
+        content {
+            includeGroup("net.kyori")
+        }
     }
-    maven("https://maven.azureaaron.net/releases") {
-        content { includeGroup("net.azureaaron") }
+    maven("https://repo.hypixel.net/repository/Hypixel/") {
+        content {
+            includeGroup("net.hypixel")
+        }
     }
-    maven("https://redirector.kotlinlang.org/maven/compose-dev")
+    maven("https://maven.deftu.dev/releases") {
+        content {
+            includeGroup("dev.deftu")
+        }
+    }
+    maven("https://maven.fabricmc.net/releases") {
+        content {
+            includeGroup("net.fabricmc")
+        }
+    }
 }
 
 loom {
@@ -63,10 +70,10 @@ dependencies {
         @Suppress("UnstableApiUsage")
         mappings(loom.layered {
             officialMojangMappings()
-            optionalProp("${property("parchment_version")}") {
+            optionalProp("parchment_version") {
                 parchment("org.parchmentmc.data:parchment-${property("minecraft_version")}:$it@zip")
             }
-            optionalProp("${property("yalmm_version")}") {
+            optionalProp("yalmm_version") {
                 mappings("dev.lambdaurora:yalmm-mojbackward:${property("minecraft_version")}+build.$it")
             }
         })
@@ -75,16 +82,20 @@ dependencies {
             mappings(it)
         }
     }
+    val oneconfigversion = property("oneconfig_version") as String
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    modImplementation("org.polyfrost.oneconfig:${property("minecraft_version")}-fabric:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:commands:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:config:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:config-impl:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:events:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:internal:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:ui:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:utils:$oneconfigVersion")
-    implementation("org.polyfrost.oneconfig:hud:$oneconfigVersion")
+    modImplementation("org.polyfrost.oneconfig:${property("minecraft_version")}-fabric:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:commands:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:config:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:config-impl:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:events:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:internal:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:ui:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:utils:$oneconfigversion")
+    implementation("org.polyfrost.oneconfig:hud:$oneconfigversion")
+    optionalProp("fabric_api_version") {
+        modImplementation("net.fabricmc.fabric-api:fabric-api:$it")
+    }
 }
 
 bloom {

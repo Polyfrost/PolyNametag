@@ -188,7 +188,7 @@ object NametagRenderer {
 
     @JvmStatic
     fun isInventoryScreenOpen(): Boolean {
-        val screen = Minecraft.getInstance().screen
+        val screen = /*? if >= 26.2 {*/ Minecraft.getInstance().gui.screen() /*?} else {*/ /*Minecraft.getInstance().screen *//*?}*/
         return screen is net.minecraft.client.gui.screens.inventory.InventoryScreen ||
             screen is net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
     }

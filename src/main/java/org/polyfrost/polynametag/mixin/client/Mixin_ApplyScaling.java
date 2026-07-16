@@ -7,8 +7,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 //?} else {
 /*import net.minecraft.client.renderer.entity.EntityRenderer;
 *///?}
-//? if >= 1.21.10
-import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
+//? if >= 26.2 {
+import net.minecraft.client.renderer.SubmitNodeCollection;
+//?} elif >= 1.21.10 {
+/*import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
+*///?}
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,14 +20,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 *///?}
 
-//? if >= 1.21.10 {
-@Mixin(NameTagFeatureRenderer.Storage.class)
-//?} else {
+//? if >= 26.2 {
+@Mixin(SubmitNodeCollection.class)
+//?} elif >= 1.21.10 {
+/*@Mixin(NameTagFeatureRenderer.Storage.class)
+*///?} else {
 /*@Mixin(EntityRenderer.class)
 *///?}
 public abstract class Mixin_ApplyScaling {
     //? if >= 1.21.10 {
-    @WrapOperation(method = "add", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
+    @WrapOperation(method = /*? if >= 26.2 {*/ "submitNameTag" /*?} else {*/ /*"add" *//*?}*/, at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
     public void applyScaling(PoseStack instance, float x, float y, float z, Operation<Void> original) {
         float scale = PolyNametagConfig.isEnabled() ? PolyNametagConfig.getScale() : 1.0F;
         original.call(instance, x * scale, y * scale, z * scale);
