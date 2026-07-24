@@ -97,6 +97,8 @@ dependencies {
     optionalProp("fabric_api_version") {
         modImplementation("net.fabricmc.fabric-api:fabric-api:$it")
     }
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+    testImplementation("net.fabricmc:fabric-loader-junit:${property("loader_version")}")
 }
 
 bloom {
@@ -146,6 +148,10 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(javaVersionInt))
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 tasks.jar {

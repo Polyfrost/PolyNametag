@@ -26,6 +26,11 @@ build - Copy.gradle
 .DS_STORE
 .kotlin
 
+# test run byproducts
+versions/*/logs/
+versions/*/mods/
+versions/*/.fabric/
+
 # Created by https://www.toptal.com/developers/gitignore/api/java,gradle,forgegradle,kotlin,macos,intellij,intellij+all,eclipse,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,gradle,forgegradle,kotlin,macos,intellij,intellij+all,eclipse,visualstudiocode
 

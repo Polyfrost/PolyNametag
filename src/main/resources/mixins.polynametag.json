@@ -1,9 +1,11 @@
 {
+	"required": true,
 	"compatibilityLevel": "JAVA_21",
 	"minVersion": "0.7",
 	"package": "org.polyfrost.polynametag.mixin",
 	"injectors": {
-		"maxShiftBy": 5
+		"maxShiftBy": 5,
+		"defaultRequire": 1
 	},
 	"client": [
 		"client.Mixin_ApplyScaling",
