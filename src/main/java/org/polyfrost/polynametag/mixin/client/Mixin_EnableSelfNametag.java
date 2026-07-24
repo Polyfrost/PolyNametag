@@ -24,7 +24,8 @@ public abstract class Mixin_EnableSelfNametag<T extends LivingEntity> {
         }
     }
 
-    @WrapOperation(method = /*? if >=1.21.4 {*/ "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z" /*?} else {*/ /*"shouldShowName(Lnet/minecraft/world/entity/LivingEntity;)Z" *//*?}*/, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;renderNames()Z"))
+    //? if < 26.2 {
+    /*@WrapOperation(method = /^? if >=1.21.4 {^/ "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z" /^?} else {^/ /^"shouldShowName(Lnet/minecraft/world/entity/LivingEntity;)Z" ^//^?}^/, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;renderNames()Z"))
     private boolean hiddenHudVisibility(Operation<Boolean> original, @Local(argsOnly = true) T livingEntity) {
         boolean renderNames = original.call();
         if (renderNames || !PolyNametagConfig.isEnabled()) return renderNames;
@@ -32,4 +33,5 @@ public abstract class Mixin_EnableSelfNametag<T extends LivingEntity> {
         if (livingEntity instanceof Player) return !PolyNametagConfig.isHidePlayerNametagsInHiddenHud();
         return !PolyNametagConfig.isHideEntityNametagsInHiddenHud();
     }
+    *///?}
 }
