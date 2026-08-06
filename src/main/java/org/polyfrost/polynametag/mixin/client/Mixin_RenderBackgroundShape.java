@@ -53,8 +53,9 @@ public abstract class Mixin_RenderBackgroundShape /*? if >= 26.2 {*/ extends Ren
             RenderType type = seeThrough ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground();
             VertexConsumer consumer = getVertexBuilder(type);
             int argb = NametagRenderer.backgroundArgb();
-            float[] vertices = NametagRenderer.backgroundQuads(submit.x(), submit.y(), context.font().width(submit.text()));
-            for (int i = 0; i < vertices.length; i += 2) {
+            float[] vertices = NametagRenderer.backgroundQuadBuffer();
+            int count = NametagRenderer.backgroundQuads(submit.x(), submit.y(), NametagRenderer.textWidth(context.font(), submit.text()));
+            for (int i = 0; i < count; i += 2) {
                 consumer.addVertex(submit.pose(), vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
                     .setColor(argb)
                     .setLight(submit.lightCoords());
@@ -117,8 +118,9 @@ public abstract class Mixin_RenderBackgroundShape /*? if >= 26.2 {*/ extends Ren
             VertexConsumer consumer = bufferSource.getBuffer(type);
 
             int argb = NametagRenderer.backgroundArgb();
-            float[] vertices = NametagRenderer.backgroundQuads(x, y, font.width(text));
-            for (int i = 0; i < vertices.length; i += 2) {
+            float[] vertices = NametagRenderer.backgroundQuadBuffer();
+            int count = NametagRenderer.backgroundQuads(x, y, NametagRenderer.textWidth(font, text));
+            for (int i = 0; i < count; i += 2) {
                 consumer.addVertex(matrix, vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
                     .setColor(argb)
                     .setLight(light);
