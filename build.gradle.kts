@@ -28,8 +28,7 @@ repositories {
     maven("https://repo.polyfrost.org/snapshots")
     maven("https://maven.parchmentmc.org")
     maven("https://maven.gegy.dev/releases")
-    //maven("https://maven.terraformersmc.com/releases") {
-    maven("https://maven.gnomecraft.net/releases/") {
+    maven("https://maven.terraformersmc.com/") {
         content {
             includeGroup("com.terraformersmc")
         }
