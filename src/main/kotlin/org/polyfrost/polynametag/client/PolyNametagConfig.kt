@@ -29,7 +29,7 @@ object PolyNametagConfig :
         get() = field.coerceIn(0.0F, 1.0F)
 
     @Dropdown(
-        title = "Text Type",
+        title = "Text Shadow",
         options = ["No Shadow", "Shadow"],
         description = "The type of shadow to render"
     )
