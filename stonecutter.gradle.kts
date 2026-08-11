@@ -3,3 +3,7 @@ plugins {
 }
 
 stonecutter active "26.2" /* [SC] DO NOT EDIT */
+
+stonecutter tasks {
+    order("publishModrinth")
+}

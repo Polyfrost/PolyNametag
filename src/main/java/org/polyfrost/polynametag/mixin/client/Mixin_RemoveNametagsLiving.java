@@ -13,13 +13,7 @@ import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/**
- * Allows nametags of living entities to stay visible while the HUD is hidden.
- * {@code LivingEntityRenderer.shouldShowName} suppresses nametags of teamless
- * living entities before the {@code EntityRenderer} injection point in
- * {@link Mixin_RemoveNametags} is ever reached, so the hidden-HUD check inside
- * it must be wrapped here.
- */
+// shouldShowName drops teamless living entities before Mixin_RemoveNametags runs so the hidden HUD check has to be wrapped here
 @Mixin(LivingEntityRenderer.class)
 public abstract class Mixin_RemoveNametagsLiving<T extends LivingEntity> {
     //? if >= 26.2 {

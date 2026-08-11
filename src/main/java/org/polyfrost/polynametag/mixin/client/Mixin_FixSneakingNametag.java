@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class Mixin_FixSneakingNametag {
-    // TODO: what is this for
+    // TODO what is this for
     @WrapOperation(method = /*? if >=1.21.4 {*/ "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z" /*?} else {*/ /*"shouldShowName(Lnet/minecraft/world/entity/LivingEntity;)Z" *//*?}*/, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isDiscrete()Z"))
     private boolean showCustomNametagWhilstSneaking(LivingEntity instance, Operation<Boolean> original) {
         if (PolyNametagConfig.isEnabled()) {

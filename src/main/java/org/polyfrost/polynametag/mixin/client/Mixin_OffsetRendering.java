@@ -24,7 +24,7 @@ public abstract class Mixin_OffsetRendering {
     private float modifyTranslateY(float original) {
         if (PolyNametagConfig.isEnabled()) {
             original -= PolyNametagConfig.getHeightOffset();
-            // TODO: is this needed?
+            // TODO is this needed
 //            if (renderState.isDiscrete) {
 //                original += 0.5F;
 //            }

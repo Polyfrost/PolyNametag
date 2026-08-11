@@ -35,11 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(targets = /*? if >= 1.21.10 {*/ "net.minecraft.client.renderer.feature.NameTagFeatureRenderer" /*?} else {*/ /*"net.minecraft.client.renderer.entity.EntityRenderer" *//*?}*/)
 public abstract class Mixin_RenderBackgroundShape /*? if >= 26.2 {*/ extends RenderTypeFeatureRenderer<NameTagFeatureRenderer.Submit> /*?}*/ {
     //? if >= 26.2 {
-    // 26.2 replaced Font.drawInBatch + MultiBufferSource with the NameTagFeatureRenderer.Submit +
-    // GlyphRenderer pipeline. Draw the custom background shape for each submit before the glyphs are
-    // built. Suppression of the default rectangular background is handled by the background-colour
-    // ModifyArg below. The mixin extends the feature-renderer superclass so the inherited
-    // getVertexBuilder is callable (it isn't declared on the target class).
+    // draws the shape before glyphs are built and extends the feature renderer superclass so inherited getVertexBuilder is callable
     @Inject(method = "buildGroup", at = @At("HEAD"))
     private void polynametag$drawShapedBackground(FeatureFrameContext context, List<NameTagFeatureRenderer.Submit> submits, CallbackInfo ci) {
         if (!NametagRenderer.useCustomBackground()) {
@@ -63,7 +59,6 @@ public abstract class Mixin_RenderBackgroundShape /*? if >= 26.2 {*/ extends Ren
         }
     }
 
-    // Suppress the default rectangular text background when a custom shape is drawn above.
     @ModifyArg(method = "prepareText", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;prepareText(Lnet/minecraft/util/FormattedCharSequence;FFIZZI)Lnet/minecraft/client/gui/Font$PreparedText;"), index = 6)
     private static int polynametag$suppressDefaultBackground(int backgroundColor) {
         return NametagRenderer.useCustomBackground() ? 0 : backgroundColor;
