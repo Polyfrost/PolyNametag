@@ -21,7 +21,7 @@ import java.util.List;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 //?} else {
-/*import net.minecraft.client.renderer.rendertype.RenderType;
+/*import net.minecraft.client.renderer.RenderType;
 *///?}
 //? if >= 26.1 {
 import org.joml.Matrix4fc;
