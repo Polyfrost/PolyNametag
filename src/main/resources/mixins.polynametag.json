@@ -9,17 +9,19 @@
 	},
 	"client": [
 		"client.Mixin_ApplyScaling",
-		"client.Mixin_ApplyTextShadow",
 		"client.Mixin_EnableSelfNametag",
 		"client.Mixin_FixSneakingNametag",
-		"client.Mixin_OffsetRendering",
 		"client.Mixin_RemoveNametags",
 		"client.Mixin_RemoveNametagsAvatar",
 		"client.Mixin_RemoveNametagsLiving",
 		"client.Mixin_RenderBackgroundShape",
-		"client.Mixin_ReplaceBackgroundRendering",
-		"client.Mixin_ReplaceTextRendering",
-		"client.Mixin_ShowInInventory"
+		"client.Mixin_RenderBackgroundShape262",
+		"client.Mixin_RenderBackgroundShape263",
+		"client.Mixin_ShowInInventory",
+		"client.Mixin_WrapNametagRender",
+		"client.Mixin_WrapNametagRender12110",
+		"client.Mixin_WrapNametagRender262",
+		"client.Mixin_WrapNametagRender263"
 	],
 	"verbose": true
 }
