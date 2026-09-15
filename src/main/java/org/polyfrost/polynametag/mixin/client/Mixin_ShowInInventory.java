@@ -12,9 +12,9 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 //? if >= 1.21.4
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 //? if >= 1.21.4 && < 1.21.10 {
-//import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-//import net.minecraft.world.phys.Vec3;
-//?}
+/*import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.world.phys.Vec3;
+*///?}
 //? if >= 1.21.10
 import net.minecraft.network.chat.Component;
 //? if 1.21.1
