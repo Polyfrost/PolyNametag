@@ -2,8 +2,10 @@ package org.polyfrost.polynametag.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+//? if > 1.8.9 {
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+//?}
 //? if 1.21.1
 //import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -17,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 *///?}
 //? if >= 1.21.10
 import net.minecraft.network.chat.Component;
-//? if 1.21.1
+//? if 1.21.1 || 1.8.9
 //import net.minecraft.world.entity.Entity;
 //? if >= 1.21.4
 import org.objectweb.asm.Opcodes;
@@ -52,7 +54,7 @@ public abstract class Mixin_ShowInInventory /*? if >= 1.21.4 {*/ <S extends Enti
             return original.call(instance);
         }
     }
-    *///?} else {
+    *///?} elif > 1.8.9 {
     /*@WrapOperation(method = "renderNameTag", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;distanceToSqr(Lnet/minecraft/world/entity/Entity;)D"))
     private double hideNametagInInventory(EntityRenderDispatcher instance, Entity entity, Operation<Double> original) {
         if (PolyNametagConfig.isEnabled() &&
@@ -62,6 +64,18 @@ public abstract class Mixin_ShowInInventory /*? if >= 1.21.4 {*/ <S extends Enti
             return Integer.MAX_VALUE;
         } else {
             return original.call(instance, entity);
+        }
+    }
+    *///?} else {
+    /*@WrapOperation(method = "renderNameTag(Lnet/minecraft/world/entity/Entity;Ljava/lang/String;DDDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;squaredDistanceTo(Lnet/minecraft/world/entity/Entity;)D"))
+    private double hideNametagInInventory(Entity instance, Entity camera, Operation<Double> original) {
+        if (PolyNametagConfig.isEnabled() &&
+                !PolyNametagConfig.isShowInInventory() &&
+                NametagRenderer.isInventoryScreenOpen() &&
+                instance == NametagRenderer.currentPlayer()) {
+            return Integer.MAX_VALUE;
+        } else {
+            return original.call(instance, camera);
         }
     }
     *///?}

@@ -27,6 +27,10 @@ class PolyNametagMixinPlugin : IMixinConfigPlugin {
         //? if < 1.21.10 {
         /*add("client.Mixin_WrapNametagRender")
         *///?}
+
+        //? if = 1.8.9 {
+        /*add("client.Mixin_FixSneakingNametag")
+        *///?}
     }
 
     override fun shouldApplyMixin(targetClassName: String?, mixinClassName: String?): Boolean = true

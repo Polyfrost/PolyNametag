@@ -1,16 +1,14 @@
 package org.polyfrost.polynametag.mixin.client;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-//? if <= 1.21.8 {
+//? if > 1.8.9 && <= 1.21.8 {
 /*import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
-*///?} else {
+*///?} elif > 1.21.8 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 //? if >= 26.1
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 //? if >= 1.21.10 && < 26.1
@@ -19,11 +17,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 //?}
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
+//? if > 1.8.9 {
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
-//? if >= 1.21.4 {
+//?} else {
+/*import net.minecraft.entity.living.ArmorStandEntity;
+import net.minecraft.entity.living.player.PlayerEntity;
+*///?}
+//? if >= 1.21.4
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+//? if >= 1.21.4 || = 1.8.9 {
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //?}
@@ -50,8 +55,10 @@ public abstract class Mixin_RemoveNametags {
     private boolean polynametag$shouldRenderNametag(Entity entity) {
         if (!PolyNametagConfig.isEnabled()) return true;
         if (PolyNametagConfig.isRemoveNametags()) return false;
-        if (/*? if >= 26.2 {*/ Minecraft.getInstance().gui.hud.isHidden() /*?} else {*/ /*!Minecraft.renderNames() *//*?}*/) {
+        if (/*? if >= 26.2 {*/ Minecraft.getInstance().gui.hud.isHidden() /*?} elif > 1.8.9 {*/ /*!Minecraft.renderNames() *//*?} else {*/ /*!Minecraft.isDisplayGui() *//*?}*/) {
+            //~ if = 1.8.9 'ArmorStand)' -> 'ArmorStandEntity)'
             if (entity instanceof ArmorStand) return !PolyNametagConfig.isHideArmorStandNametagsInHiddenHud();
+            //~ if = 1.8.9 'Player)' -> 'PlayerEntity)'
             if (entity instanceof Player) return !PolyNametagConfig.isHidePlayerNametagsInHiddenHud();
             return !PolyNametagConfig.isHideEntityNametagsInHiddenHud();
         }
@@ -83,10 +90,15 @@ public abstract class Mixin_RemoveNametags {
     private boolean removeNametagInt(Font instance, Component component, float x, float y, int color, boolean shadow, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int backgroundColor, int packedLight) {
         return polynametag$shouldRenderNametag(this.polynametag$entity);
     }
-    *///?} else {
+    *///?} elif > 1.8.9 {
     /*@WrapWithCondition(method = "renderNameTag", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/network/chat/Component;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)I"))
     private boolean removeNametagInt(Font instance, Component component, float x, float y, int color, boolean shadow, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int backgroundColor, int packedLight, @Local(argsOnly = true) Entity entity) {
         return polynametag$shouldRenderNametag(entity);
+    }
+    *///?} else {
+    /*@Inject(method = "renderNameTag(Lnet/minecraft/world/entity/Entity;Ljava/lang/String;DDDI)V", at = @At("HEAD"), cancellable = true)
+    private void removeNametag(Entity entity, String name, double dx, double dy, double dz, int distance, CallbackInfo ci) {
+        if (!polynametag$shouldRenderNametag(entity)) ci.cancel();
     }
     *///?}
 }

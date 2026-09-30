@@ -1,18 +1,26 @@
 package org.polyfrost.polynametag.client
 
 import net.minecraft.client.Minecraft
+//? if > 1.8.9 {
 import net.minecraft.client.gui.Font
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.TextColor
+//?}
 //? if >= 26.3 {
 import net.minecraft.util.FormattedCharSequence
 import net.minecraft.util.FormattedCharSink
 //?}
-import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.Entity
+//? if > 1.8.9 {
+import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
+//?} else {
+/*import net.minecraft.client.gui.screen.inventory.menu.PlayerInventoryScreen
+import net.minecraft.entity.living.ArmorStandEntity as ArmorStand
+import net.minecraft.util.math.Box as AABB
+*///?}
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -42,8 +50,10 @@ object NametagRenderer {
     private val quadScratch = FloatArray(MAX_QUAD_FLOATS)
     private val rectScratch = FloatArray((CORNER_SEGMENTS * 2 + 1) * 4)
 
+    //? if > 1.8.9 {
     private var lastWidthText: Component? = null
     private var lastWidth = 0
+    //?}
 
     init {
         val starts = doubleArrayOf(Math.PI, Math.PI * 1.5, 0.0, Math.PI * 0.5)
@@ -85,6 +95,7 @@ object NametagRenderer {
     @JvmStatic
     fun backgroundArgb(): Int = PolyNametagConfig.backgroundColor.argb
 
+    //? if > 1.8.9 {
     @JvmStatic
     fun textWidth(font: Font, text: Component): Int {
         if (lastWidthText === text) {
@@ -95,6 +106,7 @@ object NametagRenderer {
         lastWidth = width
         return width
     }
+    //?}
 
     @JvmStatic
     fun backgroundQuadBuffer(): FloatArray = quadScratch
@@ -195,6 +207,7 @@ object NametagRenderer {
         }
     }
 
+    //? if > 1.8.9 {
     @JvmStatic
     fun overrideTextComponent(original: Component): Component {
         if (!PolyNametagConfig.isEnabled || !PolyNametagConfig.overrideTextColor) {
@@ -202,6 +215,7 @@ object NametagRenderer {
         }
         return stripColor(original)
     }
+    //?}
 
     //? if >= 26.3 {
     // 26.3 renders nametags through TextFeatureRenderer, which is shared with signs, text displays and map
@@ -217,6 +231,7 @@ object NametagRenderer {
     fun isNametagText(text: FormattedCharSequence): Boolean = text is NametagText
     //?}
 
+    //? if > 1.8.9 {
     private fun stripColor(component: Component): Component {
         val result: MutableComponent = MutableComponent.create(component.contents)
             .setStyle(component.style.withColor(null as TextColor?))
@@ -225,6 +240,7 @@ object NametagRenderer {
         }
         return result
     }
+    //?}
 
     @JvmStatic
     fun backgroundColor(original: Int): Int {
@@ -268,20 +284,26 @@ object NametagRenderer {
 
     @JvmStatic
     fun hasServerNametag(entity: Entity): Boolean {
+        //~ if = 1.8.9 'entity.level()' -> 'entity.world'
         val level = entity.level()
         val box = AABB(
             entity.x - HEAD_SEARCH_RADIUS,
+            //~ if = 1.8.9 'bbHeight' -> 'height'
             entity.y + entity.bbHeight * 0.5,
             entity.z - HEAD_SEARCH_RADIUS,
             entity.x + HEAD_SEARCH_RADIUS,
+            //~ if = 1.8.9 'bbHeight' -> 'height'
             entity.y + entity.bbHeight + HEAD_SEARCH_TOP,
             entity.z + HEAD_SEARCH_RADIUS
         )
+        //~ if = 1.8.9 'isNametagEntity(it)' -> 'isNametagEntity(it!!)'
         return level.getEntities(entity, box) { it !== entity && isNametagEntity(it) }.isNotEmpty()
     }
 
     private fun isNametagEntity(entity: Entity): Boolean = when (entity) {
+        //? if > 1.8.9
         is Display.TextDisplay -> true
+        //~ if = 1.8.9 'entity.customName != null' -> 'entity.hasCustomName()'
         is ArmorStand -> entity.isCustomNameVisible && entity.customName != null
         else -> false
     }
@@ -289,8 +311,11 @@ object NametagRenderer {
     @JvmStatic
     fun isInventoryScreenOpen(): Boolean {
         val screen = /*? if >= 26.2 {*/ Minecraft.getInstance().gui.screen() /*?} else {*/ /*Minecraft.getInstance().screen *//*?}*/
+        //? if > 1.8.9 {
         return screen is net.minecraft.client.gui.screens.inventory.InventoryScreen ||
             screen is net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+        //?} else
+        //return screen is PlayerInventoryScreen
     }
 
     private fun Int.withAlpha(alpha: Int): Int = (this and 0x00FFFFFF) or (alpha.coerceIn(0, 255) shl 24)

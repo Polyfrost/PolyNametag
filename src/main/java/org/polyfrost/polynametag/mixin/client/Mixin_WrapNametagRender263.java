@@ -25,7 +25,7 @@ public abstract class Mixin_WrapNametagRender263 {
         return original.call(
             x,
             NametagRenderer.translateY(y),
-            string,
+            NametagRenderer.markNametagText(string),
             NametagRenderer.textShadow(dropShadow),
             NametagRenderer.textColor(color),
             NametagRenderer.backgroundColor(backgroundColor),
