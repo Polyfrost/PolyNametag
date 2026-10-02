@@ -60,7 +60,7 @@ public abstract class Mixin_RenderBackgroundShape {
 
             int argb = NametagRenderer.backgroundArgb();
             float[] vertices = NametagRenderer.backgroundQuadBuffer();
-            int count = NametagRenderer.backgroundQuads(x, y, NametagRenderer.textWidth(font, text));
+            int count = NametagRenderer.backgroundQuads(x, y, -2.0F * x);
             for (int i = 0; i < count; i += 2) {
                 consumer.addVertex(matrix, vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
                     .setColor(argb)

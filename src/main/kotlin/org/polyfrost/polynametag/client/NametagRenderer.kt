@@ -1,7 +1,6 @@
 package org.polyfrost.polynametag.client
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.Font
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.TextColor
@@ -42,9 +41,6 @@ object NametagRenderer {
     private val quadScratch = FloatArray(MAX_QUAD_FLOATS)
     private val rectScratch = FloatArray((CORNER_SEGMENTS * 2 + 1) * 4)
 
-    private var lastWidthText: Component? = null
-    private var lastWidth = 0
-
     init {
         val starts = doubleArrayOf(Math.PI, Math.PI * 1.5, 0.0, Math.PI * 0.5)
         val ends = doubleArrayOf(Math.PI * 1.5, Math.PI * 2.0, Math.PI * 0.5, Math.PI)
@@ -84,17 +80,6 @@ object NametagRenderer {
 
     @JvmStatic
     fun backgroundArgb(): Int = PolyNametagConfig.backgroundColor.argb
-
-    @JvmStatic
-    fun textWidth(font: Font, text: Component): Int {
-        if (lastWidthText === text) {
-            return lastWidth
-        }
-        val width = font.width(text)
-        lastWidthText = text
-        lastWidth = width
-        return width
-    }
 
     @JvmStatic
     fun backgroundQuadBuffer(): FloatArray = quadScratch
