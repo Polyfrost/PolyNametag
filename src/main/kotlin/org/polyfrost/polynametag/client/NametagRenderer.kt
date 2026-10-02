@@ -1,5 +1,6 @@
 package org.polyfrost.polynametag.client
 
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -262,13 +263,16 @@ object NametagRenderer {
             entity.y + entity.bbHeight + HEAD_SEARCH_TOP,
             entity.z + HEAD_SEARCH_RADIUS
         )
-        return level.getEntities(entity, box) { it !== entity && isNametagEntity(it) }.isNotEmpty()
+        val name = entity.scoreboardName
+        return level.getEntities(entity, box) {
+            it !== entity && ChatFormatting.stripFormatting(nametagText(it))?.contains(name) == true
+        }.isNotEmpty()
     }
 
-    private fun isNametagEntity(entity: Entity): Boolean = when (entity) {
-        is Display.TextDisplay -> true
-        is ArmorStand -> entity.isCustomNameVisible && entity.customName != null
-        else -> false
+    private fun nametagText(entity: Entity): String? = when (entity) {
+        is Display.TextDisplay -> entity.textRenderState()?.text()?.string
+        is ArmorStand -> if (entity.isCustomNameVisible) entity.customName?.string else null
+        else -> null
     }
 
     @JvmStatic
