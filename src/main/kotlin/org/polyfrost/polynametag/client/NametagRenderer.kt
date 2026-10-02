@@ -1,8 +1,9 @@
 package org.polyfrost.polynametag.client
 
+//~ if = 1.8.9 'net.minecraft.ChatFormatting' -> 'net.minecraft.text.Formatting as ChatFormatting'
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 //? if > 1.8.9 {
-import net.minecraft.client.gui.Font
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.TextColor
@@ -50,11 +51,6 @@ object NametagRenderer {
     private val quadScratch = FloatArray(MAX_QUAD_FLOATS)
     private val rectScratch = FloatArray((CORNER_SEGMENTS * 2 + 1) * 4)
 
-    //? if > 1.8.9 {
-    private var lastWidthText: Component? = null
-    private var lastWidth = 0
-    //?}
-
     init {
         val starts = doubleArrayOf(Math.PI, Math.PI * 1.5, 0.0, Math.PI * 0.5)
         val ends = doubleArrayOf(Math.PI * 1.5, Math.PI * 2.0, Math.PI * 0.5, Math.PI)
@@ -94,19 +90,6 @@ object NametagRenderer {
 
     @JvmStatic
     fun backgroundArgb(): Int = PolyNametagConfig.backgroundColor.argb
-
-    //? if > 1.8.9 {
-    @JvmStatic
-    fun textWidth(font: Font, text: Component): Int {
-        if (lastWidthText === text) {
-            return lastWidth
-        }
-        val width = font.width(text)
-        lastWidthText = text
-        lastWidth = width
-        return width
-    }
-    //?}
 
     @JvmStatic
     fun backgroundQuadBuffer(): FloatArray = quadScratch
@@ -296,16 +279,20 @@ object NametagRenderer {
             entity.y + entity.bbHeight + HEAD_SEARCH_TOP,
             entity.z + HEAD_SEARCH_RADIUS
         )
-        //~ if = 1.8.9 'isNametagEntity(it)' -> 'isNametagEntity(it!!)'
-        return level.getEntities(entity, box) { it !== entity && isNametagEntity(it) }.isNotEmpty()
+        //~ if = 1.8.9 'entity.scoreboardName' -> 'entity.name'
+        val name = entity.scoreboardName
+        return level.getEntities(entity, box) {
+            //~ if = 1.8.9 'stripFormatting(nametagText(it))' -> 'strip(nametagText(it!!))'
+            it !== entity && ChatFormatting.stripFormatting(nametagText(it))?.contains(name) == true
+        }.isNotEmpty()
     }
 
-    private fun isNametagEntity(entity: Entity): Boolean = when (entity) {
+    private fun nametagText(entity: Entity): String? = when (entity) {
         //? if > 1.8.9
-        is Display.TextDisplay -> true
-        //~ if = 1.8.9 'entity.customName != null' -> 'entity.hasCustomName()'
-        is ArmorStand -> entity.isCustomNameVisible && entity.customName != null
-        else -> false
+        is Display.TextDisplay -> entity.textRenderState()?.text()?.string
+        //~ if = 1.8.9 'entity.customName?.string' -> 'entity.customName'
+        is ArmorStand -> if (entity.isCustomNameVisible) entity.customName?.string else null
+        else -> null
     }
 
     @JvmStatic
