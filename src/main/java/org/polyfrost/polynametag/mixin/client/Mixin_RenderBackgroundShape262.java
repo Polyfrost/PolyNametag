@@ -32,21 +32,21 @@ public abstract class Mixin_RenderBackgroundShape262
             return;
         }
 
+        int argb = NametagRenderer.backgroundArgb();
+        float[] vertices = NametagRenderer.backgroundQuadBuffer();
+        VertexConsumer consumer = null;
+        Font.DisplayMode consumerMode = null;
         for (NameTagFeatureRenderer.Submit submit : submits) {
             if ((submit.backgroundColor() >>> 24) == 0) {
                 continue;
             }
 
-            boolean seeThrough = submit.displayMode() == Font.DisplayMode.SEE_THROUGH;
-            RenderType type = seeThrough ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground();
-            VertexConsumer consumer = getVertexBuilder(type);
-            int argb = NametagRenderer.backgroundArgb();
-            float[] vertices = NametagRenderer.backgroundQuadBuffer();
-            int count = NametagRenderer.backgroundQuads(
-                submit.x(),
-                submit.y(),
-                NametagRenderer.textWidth(context.font(), submit.text())
-            );
+            if (consumer == null || submit.displayMode() != consumerMode) {
+                consumerMode = submit.displayMode();
+                RenderType type = consumerMode == Font.DisplayMode.SEE_THROUGH ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground();
+                consumer = getVertexBuilder(type);
+            }
+            int count = NametagRenderer.backgroundQuads(submit.x(), submit.y(), -2.0F * submit.x());
             for (int i = 0; i < count; i += 2) {
                 consumer.addVertex(submit.pose(), vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
                     .setColor(argb)
