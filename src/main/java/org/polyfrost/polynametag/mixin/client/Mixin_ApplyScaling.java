@@ -34,8 +34,18 @@ public abstract class Mixin_ApplyScaling {
         float scale = PolyNametagConfig.isEnabled() ? PolyNametagConfig.getScale() : 1.0F;
         original.call(instance, x * scale, y * scale, z * scale);
     }
-    //?} else {
+    //?} elif > 1.8.9 {
     /*@ModifyArgs(method = "renderNameTag", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
+    private void applyScaling(Args args) {
+        if (PolyNametagConfig.isEnabled()) {
+            final float scale = PolyNametagConfig.getScale();
+            args.set(0, ((float) args.get(0)) * scale);
+            args.set(1, ((float) args.get(1)) * scale);
+            args.set(2, ((float) args.get(2)) * scale);
+        }
+    }
+    *///?} else {
+    /*@ModifyArgs(method = "renderNameTag(Lnet/minecraft/world/entity/Entity;Ljava/lang/String;DDDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/platform/GlStateManager;scalef(FFF)V"))
     private void applyScaling(Args args) {
         if (PolyNametagConfig.isEnabled()) {
             final float scale = PolyNametagConfig.getScale();

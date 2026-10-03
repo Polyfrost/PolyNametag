@@ -1,4 +1,3 @@
-## 1.2.0
-- Optimized performance slightly
-- Renamed Text Type to Text Shadow
-- Added support for Minecraft 26.3
+## 1.2.1
+- Optimized performance slightly (again)
+- Fix own nametag hiding behind armor stands

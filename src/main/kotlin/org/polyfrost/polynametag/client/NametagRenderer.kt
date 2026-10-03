@@ -1,18 +1,27 @@
 package org.polyfrost.polynametag.client
 
+//~ if = 1.8.9 'net.minecraft.ChatFormatting' -> 'net.minecraft.text.Formatting as ChatFormatting'
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
+//? if > 1.8.9 {
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.TextColor
+//?}
 //? if >= 26.3 {
 import net.minecraft.util.FormattedCharSequence
 import net.minecraft.util.FormattedCharSink
 //?}
-import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.Entity
+//? if > 1.8.9 {
+import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
+//?} else {
+/*import net.minecraft.client.gui.screen.inventory.menu.PlayerInventoryScreen
+import net.minecraft.entity.living.ArmorStandEntity as ArmorStand
+import net.minecraft.util.math.Box as AABB
+*///?}
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -181,6 +190,7 @@ object NametagRenderer {
         }
     }
 
+    //? if > 1.8.9 {
     @JvmStatic
     fun overrideTextComponent(original: Component): Component {
         if (!PolyNametagConfig.isEnabled || !PolyNametagConfig.overrideTextColor) {
@@ -188,6 +198,7 @@ object NametagRenderer {
         }
         return stripColor(original)
     }
+    //?}
 
     //? if >= 26.3 {
     // 26.3 renders nametags through TextFeatureRenderer, which is shared with signs, text displays and map
@@ -203,6 +214,7 @@ object NametagRenderer {
     fun isNametagText(text: FormattedCharSequence): Boolean = text is NametagText
     //?}
 
+    //? if > 1.8.9 {
     private fun stripColor(component: Component): Component {
         val result: MutableComponent = MutableComponent.create(component.contents)
             .setStyle(component.style.withColor(null as TextColor?))
@@ -211,6 +223,7 @@ object NametagRenderer {
         }
         return result
     }
+    //?}
 
     @JvmStatic
     fun backgroundColor(original: Int): Int {
@@ -254,23 +267,30 @@ object NametagRenderer {
 
     @JvmStatic
     fun hasServerNametag(entity: Entity): Boolean {
+        //~ if = 1.8.9 'entity.level()' -> 'entity.world'
         val level = entity.level()
         val box = AABB(
             entity.x - HEAD_SEARCH_RADIUS,
+            //~ if = 1.8.9 'bbHeight' -> 'height'
             entity.y + entity.bbHeight * 0.5,
             entity.z - HEAD_SEARCH_RADIUS,
             entity.x + HEAD_SEARCH_RADIUS,
+            //~ if = 1.8.9 'bbHeight' -> 'height'
             entity.y + entity.bbHeight + HEAD_SEARCH_TOP,
             entity.z + HEAD_SEARCH_RADIUS
         )
+        //~ if = 1.8.9 'entity.scoreboardName' -> 'entity.name'
         val name = entity.scoreboardName
         return level.getEntities(entity, box) {
+            //~ if = 1.8.9 'stripFormatting(nametagText(it))' -> 'strip(nametagText(it!!))'
             it !== entity && ChatFormatting.stripFormatting(nametagText(it))?.contains(name) == true
         }.isNotEmpty()
     }
 
     private fun nametagText(entity: Entity): String? = when (entity) {
+        //? if > 1.8.9
         is Display.TextDisplay -> entity.textRenderState()?.text()?.string
+        //~ if = 1.8.9 'entity.customName?.string' -> 'entity.customName'
         is ArmorStand -> if (entity.isCustomNameVisible) entity.customName?.string else null
         else -> null
     }
@@ -278,8 +298,11 @@ object NametagRenderer {
     @JvmStatic
     fun isInventoryScreenOpen(): Boolean {
         val screen = /*? if >= 26.2 {*/ Minecraft.getInstance().gui.screen() /*?} else {*/ /*Minecraft.getInstance().screen *//*?}*/
+        //? if > 1.8.9 {
         return screen is net.minecraft.client.gui.screens.inventory.InventoryScreen ||
             screen is net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+        //?} else
+        //return screen is PlayerInventoryScreen
     }
 
     private fun Int.withAlpha(alpha: Int): Int = (this and 0x00FFFFFF) or (alpha.coerceIn(0, 255) shl 24)

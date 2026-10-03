@@ -7,8 +7,13 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.LivingEntity;
+//? if > 1.8.9 {
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+//?} else {
+/*import net.minecraft.entity.living.ArmorStandEntity;
+import net.minecraft.entity.living.player.PlayerEntity;
+*///?}
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,13 +30,22 @@ public abstract class Mixin_RemoveNametagsLiving<T extends LivingEntity> {
         if (livingEntity instanceof Player) return PolyNametagConfig.isHidePlayerNametagsInHiddenHud();
         return PolyNametagConfig.isHideEntityNametagsInHiddenHud();
     }
-    //?} else {
+    //?} elif > 1.8.9 {
     /*@WrapOperation(method = /^? if >=1.21.4 {^/ "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z" /^?} else {^/ /^"shouldShowName(Lnet/minecraft/world/entity/LivingEntity;)Z" ^//^?}^/, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;renderNames()Z"))
     private boolean hiddenHudVisibility(Operation<Boolean> original, @Local(argsOnly = true) T livingEntity) {
         boolean renderNames = original.call();
         if (renderNames || !PolyNametagConfig.isEnabled()) return renderNames;
         if (livingEntity instanceof ArmorStand) return !PolyNametagConfig.isHideArmorStandNametagsInHiddenHud();
         if (livingEntity instanceof Player) return !PolyNametagConfig.isHidePlayerNametagsInHiddenHud();
+        return !PolyNametagConfig.isHideEntityNametagsInHiddenHud();
+    }
+    *///?} else {
+    /*@WrapOperation(method = "shouldRenderNameTag(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isDisplayGui()Z"))
+    private boolean hiddenHudVisibility(Operation<Boolean> original, @Local(argsOnly = true) T livingEntity) {
+        boolean renderNames = original.call();
+        if (renderNames || !PolyNametagConfig.isEnabled()) return renderNames;
+        if (livingEntity instanceof ArmorStandEntity) return !PolyNametagConfig.isHideArmorStandNametagsInHiddenHud();
+        if (livingEntity instanceof PlayerEntity) return !PolyNametagConfig.isHidePlayerNametagsInHiddenHud();
         return !PolyNametagConfig.isHideEntityNametagsInHiddenHud();
     }
     *///?}

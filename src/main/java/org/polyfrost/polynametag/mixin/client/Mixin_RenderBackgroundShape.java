@@ -1,6 +1,6 @@
 package org.polyfrost.polynametag.mixin.client;
 
-//? if < 26.2 {
+//? if > 1.8.9 && < 26.2 {
 /*import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -72,6 +72,59 @@ public abstract class Mixin_RenderBackgroundShape {
 
         //~ if < 1.21.8 'original.call(' -> 'return original.call('
         original.call(font, text, x, y, color, shadow, matrix, bufferSource, displayMode, backgroundColor, packedLightCoords);
+    }
+}
+*///?} elif = 1.8.9 {
+/*import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.render.TextRenderer;
+import net.minecraft.client.render.vertex.BufferBuilder;
+import net.minecraft.client.render.vertex.DefaultVertexFormat;
+import net.minecraft.client.render.vertex.Tesselator;
+import org.polyfrost.polynametag.client.NametagRenderer;
+import org.polyfrost.polynametag.client.PolyNametagConfig;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+
+@Mixin(targets = "net.minecraft.client.renderer.entity.EntityRenderer")
+public abstract class Mixin_RenderBackgroundShape {
+    @WrapOperation(
+        method = "renderNameTag(Lnet/minecraft/world/entity/Entity;Ljava/lang/String;DDDI)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/render/vertex/Tesselator;end()V"
+        )
+    )
+    private void polynametag$drawShapedBackground(
+        Tesselator tesselator,
+        Operation<Void> original,
+        @Local(argsOnly = true) String name,
+        @Local TextRenderer font
+    ) {
+        if (PolyNametagConfig.isEnabled()) {
+            BufferBuilder buffer = tesselator.getBuffer();
+            buffer.end();
+            buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
+
+            int argb = NametagRenderer.backgroundColor(0x40000000);
+            if ((argb >>> 24) != 0) {
+                int width = font.getWidth(name);
+                float[] vertices = NametagRenderer.backgroundQuadBuffer();
+                int count = NametagRenderer.backgroundQuads(
+                    -width / 2,
+                    NametagRenderer.translateY(name.equals("deadmau5") ? -10 : 0),
+                    width
+                );
+                for (int i = 0; i < count; i += 2) {
+                    buffer.vertex(vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
+                        .color(argb >> 16 & 255, argb >> 8 & 255, argb & 255, argb >>> 24)
+                        .nextVertex();
+                }
+            }
+        }
+
+        original.call(tesselator);
     }
 }
 *///?} else {

@@ -1,0 +1,6 @@
+tiny	2	0	intermediary	named
+c	net/minecraft/unmapped/C_32220415	net/minecraft/server/Bootstrap
+c	net/minecraft/unmapped/C_53593123	net/minecraft/client/renderer/entity/EntityRenderer
+c	net/minecraft/unmapped/C_71252617	net/minecraft/client/renderer/entity/LivingEntityRenderer
+c	net/minecraft/unmapped/C_42232651	net/minecraft/world/entity/Entity
+c	net/minecraft/unmapped/C_74425583	net/minecraft/world/entity/LivingEntity
