@@ -4,7 +4,7 @@ mod.group = "org.polyfrost"
 mod.version = "1.2.1"
 
 deps.fabric_loader = "0.19.3"
-deps.oneconfig = "1.2.8"
+deps.oneconfig = "1.2.10"
 deps.junit = "6.1.3"
 
 loomx.loom_version = "1.17-SNAPSHOT"
@@ -15,8 +15,6 @@ publish.modrinth = "HK3p7LMj"
 mod.mc_compat = "1.8.9"
 mod.mc_releases = ["1.8.9"]
 feather_build = 1
-# OneConfig 1.2.8 has no 1.8.9-ornithe artifact yet
-deps.oneconfig = "1.2.7"
 deps.osl_entrypoints = "0.6.1+mc13w16a-mc1.14.4"
 
 ["1.21.1"]
