@@ -1,3 +1,3 @@
-## 1.2.1
-- Optimized performance slightly (again)
-- Fix own nametag hiding behind armor stands
+## 1.2.2
+- Fix see-through nametags on 26.3
+- Fix background options on 1.21.11 - 26.2
