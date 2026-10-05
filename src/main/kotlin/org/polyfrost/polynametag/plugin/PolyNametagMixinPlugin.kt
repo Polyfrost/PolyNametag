@@ -20,7 +20,7 @@ class PolyNametagMixinPlugin : IMixinConfigPlugin {
         /*add("client.Mixin_RenderBackgroundShape")
         *///?}
 
-        //? if = 1.21.10 {
+        //? if >= 1.21.10 && < 26.2 {
         /*add("client.Mixin_WrapNametagRender12110")
         *///?}
 

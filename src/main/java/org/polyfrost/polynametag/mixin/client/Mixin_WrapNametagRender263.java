@@ -3,13 +3,12 @@ package org.polyfrost.polynametag.mixin.client;
 //? if >= 26.3 {
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.network.chat.Component;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.gui.Font;
 import net.minecraft.util.FormattedCharSequence;
-import org.joml.Matrix4fc;
 import org.polyfrost.polynametag.client.NametagRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import net.minecraft.client.renderer.feature.TextFeatureRenderer;
 
 @Mixin(targets = "net.minecraft.client.renderer.SubmitNodeCollection")
@@ -21,12 +20,13 @@ public abstract class Mixin_WrapNametagRender263 {
             target = "(FFLnet/minecraft/util/FormattedCharSequence;ZIII)Lnet/minecraft/client/renderer/feature/TextFeatureRenderer$Content$Text;"
         )
     )
-    private static TextFeatureRenderer.Content.Text wrapNametagRender(float x, float y, FormattedCharSequence string, boolean dropShadow, int color, int backgroundColor, int outlineColor, Operation<TextFeatureRenderer.Content.Text> original) {
+    private static TextFeatureRenderer.Content.Text wrapNametagRender(float x, float y, FormattedCharSequence string, boolean dropShadow, int color, int backgroundColor, int outlineColor, Operation<TextFeatureRenderer.Content.Text> original, @Local(argsOnly = true) Font.DisplayMode displayMode) {
+        boolean shadow = displayMode == Font.DisplayMode.SEE_THROUGH ? dropShadow : NametagRenderer.textShadow(dropShadow);
         return original.call(
             x,
             NametagRenderer.translateY(y),
             NametagRenderer.markNametagText(string),
-            NametagRenderer.textShadow(dropShadow),
+            shadow,
             NametagRenderer.textColor(color),
             NametagRenderer.backgroundColor(backgroundColor),
             outlineColor
