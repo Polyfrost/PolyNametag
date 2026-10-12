@@ -1,3 +1,2 @@
-## 1.2.2
-- Fix see-through nametags on 26.3
-- Fix background options on 1.21.11 - 26.2
+## 1.2.3
+- Fixed nametag shadows z-fighting on 1.8.9
