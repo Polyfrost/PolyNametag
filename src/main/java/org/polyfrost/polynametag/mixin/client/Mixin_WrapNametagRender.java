@@ -65,7 +65,8 @@ public abstract class Mixin_WrapNametagRender {
         method = "renderNameTag(Lnet/minecraft/world/entity/Entity;Ljava/lang/String;DDDI)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/render/TextRenderer;draw(Ljava/lang/String;III)I"
+            target = "Lnet/minecraft/client/render/TextRenderer;draw(Ljava/lang/String;III)I",
+            ordinal = 0
         )
     )
     private int wrapNametagRender(TextRenderer font, String str, int x, int y, int color, Operation<Integer> original) {
@@ -76,6 +77,30 @@ public abstract class Mixin_WrapNametagRender {
             NametagRenderer.textColor(color),
             NametagRenderer.textShadow(false)
         );
+    }
+
+    @WrapOperation(
+        method = "renderNameTag(Lnet/minecraft/world/entity/Entity;Ljava/lang/String;DDDI)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/render/TextRenderer;draw(Ljava/lang/String;III)I",
+            ordinal = 1
+        )
+    )
+    private int wrapOpaqueNametagRender(TextRenderer font, String str, int x, int y, int color, Operation<Integer> original) {
+        float textY = NametagRenderer.translateY(y);
+        int textColor = NametagRenderer.textColor(color);
+        if (!NametagRenderer.textShadow(false)) {
+            return font.draw(str, x, textY, textColor, false);
+        }
+
+        GlStateManager.depthMask(false);
+        int width = font.draw(str, x, textY, textColor, true);
+        GlStateManager.depthMask(true);
+        GlStateManager.colorMask(false, false, false, false);
+        font.draw(str, x, textY, textColor, false);
+        GlStateManager.colorMask(true, true, true, true);
+        return width;
     }
 
     @Unique
