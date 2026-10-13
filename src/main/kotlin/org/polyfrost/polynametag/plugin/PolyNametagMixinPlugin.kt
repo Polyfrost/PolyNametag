@@ -30,6 +30,7 @@ class PolyNametagMixinPlugin : IMixinConfigPlugin {
 
         //? if = 1.8.9 {
         /*add("client.Mixin_FixSneakingNametag")
+        add("client.Mixin_RespectCustomNameVisible")
         *///?}
     }
 
