@@ -74,7 +74,7 @@ public abstract class Mixin_WrapNametagRender {
             str,
             x,
             NametagRenderer.translateY(y),
-            NametagRenderer.textColor(color),
+            NametagRenderer.seeThroughTextColor(color),
             NametagRenderer.textShadow(false)
         );
     }

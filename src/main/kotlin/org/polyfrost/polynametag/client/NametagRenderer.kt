@@ -38,6 +38,8 @@ object NametagRenderer {
     private const val HEAD_SEARCH_RADIUS = 0.75
     private const val HEAD_SEARCH_TOP = 1.25
 
+    private const val SEE_THROUGH_TEXT_ALPHA = 0x40
+
     const val BACKGROUND_DEPTH = 0.01F
 
     private val ARC_COS = FloatArray(PERIMETER_POINTS)
@@ -188,6 +190,15 @@ object NametagRenderer {
         } else {
             color
         }
+    }
+
+    @JvmStatic
+    fun seeThroughTextColor(original: Int): Int {
+        if (!PolyNametagConfig.isEnabled || PolyNametagConfig.background) {
+            return textColor(original)
+        }
+        val color = PolyNametagConfig.textColor.argb
+        return color.withAlpha((color ushr 24).coerceAtMost(SEE_THROUGH_TEXT_ALPHA))
     }
 
     //? if > 1.8.9 {
