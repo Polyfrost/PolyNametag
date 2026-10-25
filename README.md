@@ -10,6 +10,7 @@ PolyNametag restyles the nametags above players and other entities, and shows yo
 - Move nametags up or down, and scale them down
 - Text shadow and custom text color
 - Custom background color, rounded corners and padding, or no background at all
+- Optional player team-colored backgrounds on 1.8.9 Ornithe, keeping your configured opacity
 - See your own nametag in third person (and in your inventory, if you want)
 - Keep nametags visible while the HUD is hidden with F1 (separate toggles for players, armor stands and everything else)
 - Hide every nametag with one switch

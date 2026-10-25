@@ -59,6 +59,11 @@ object PolyNametagConfig :
     @Switch(title = "Background", description = "Whether to render a background behind the nametag")
     var background = true
 
+    //? if = 1.8.9 {
+    /*@Switch(title = "Player team backgrounds", description = "Use each player's scoreboard team color for their background, keeping the configured opacity.")
+    var teamBackground = false
+    *///?}
+
     @Color(title = "Background color", description = "The color of the background")
     var backgroundColor = PolyColor(0x3F000000)
 
@@ -87,6 +92,9 @@ object PolyNametagConfig :
 
     init {
         addDependency("backgroundColor", "background")
+        //? if = 1.8.9 {
+        /*addDependency("teamBackground", "background")
+        *///?}
 //        addDependency("background", "Patcher's Disable Nametag Boxes. Please turn it off to use this feature.") {
 //            if (PolyNametagClient.isPatcher && PatcherConfig.disableNametagBoxes) {
 //                Property.Display.DISABLED

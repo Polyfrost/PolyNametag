@@ -83,6 +83,8 @@ import net.minecraft.client.render.vertex.BufferBuilder;
 import net.minecraft.client.render.vertex.DefaultVertexFormat;
 import net.minecraft.client.render.vertex.Tesselator;
 import org.polyfrost.polynametag.client.NametagRenderer;
+import org.polyfrost.polynametag.client.TeamColors;
+import net.minecraft.world.entity.Entity;
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -100,6 +102,7 @@ public abstract class Mixin_RenderBackgroundShape {
         Tesselator tesselator,
         Operation<Void> original,
         @Local(argsOnly = true) String name,
+        @Local(argsOnly = true) Entity entity,
         @Local TextRenderer font
     ) {
         if (PolyNametagConfig.isEnabled()) {
@@ -107,7 +110,7 @@ public abstract class Mixin_RenderBackgroundShape {
             buffer.end();
             buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
 
-            int argb = NametagRenderer.backgroundColor(0x40000000);
+            int argb = TeamColors.background(entity, NametagRenderer.backgroundColor(0x40000000));
             if ((argb >>> 24) != 0) {
                 int width = font.getWidth(name);
                 float[] vertices = NametagRenderer.backgroundQuadBuffer();
