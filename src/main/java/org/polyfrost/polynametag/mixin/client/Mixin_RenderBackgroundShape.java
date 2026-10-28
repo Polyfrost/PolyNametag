@@ -85,10 +85,14 @@ import net.minecraft.client.render.vertex.Tesselator;
 import org.polyfrost.polynametag.client.NametagRenderer;
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(targets = "net.minecraft.client.renderer.entity.EntityRenderer")
 public abstract class Mixin_RenderBackgroundShape {
+    @Shadow
+    public abstract TextRenderer getTextRenderer();
+
     @WrapOperation(
         method = "renderNameTag(Lnet/minecraft/world/entity/Entity;Ljava/lang/String;DDDI)V",
         at = @At(
@@ -99,8 +103,7 @@ public abstract class Mixin_RenderBackgroundShape {
     private void polynametag$drawShapedBackground(
         Tesselator tesselator,
         Operation<Void> original,
-        @Local(argsOnly = true) String name,
-        @Local TextRenderer font
+        @Local(argsOnly = true) String name
     ) {
         if (PolyNametagConfig.isEnabled()) {
             BufferBuilder buffer = tesselator.getBuffer();
@@ -109,7 +112,7 @@ public abstract class Mixin_RenderBackgroundShape {
 
             int argb = NametagRenderer.backgroundColor(0x40000000);
             if ((argb >>> 24) != 0) {
-                int width = font.getWidth(name);
+                int width = getTextRenderer().getWidth(name);
                 float[] vertices = NametagRenderer.backgroundQuadBuffer();
                 int count = NametagRenderer.backgroundQuads(
                     -width / 2,
