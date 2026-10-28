@@ -4,6 +4,8 @@ package org.polyfrost.polynametag.client
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 //? if > 1.8.9 {
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+import net.minecraft.client.gui.screens.inventory.InventoryScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.TextColor
@@ -310,8 +312,7 @@ object NametagRenderer {
     fun isInventoryScreenOpen(): Boolean {
         val screen = /*? if >= 26.2 {*/ Minecraft.getInstance().gui.screen() /*?} else {*/ /*Minecraft.getInstance().screen *//*?}*/
         //? if > 1.8.9 {
-        return screen is net.minecraft.client.gui.screens.inventory.InventoryScreen ||
-            screen is net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+        return screen is InventoryScreen || screen is CreativeModeInventoryScreen
         //?} else
         //return screen is PlayerInventoryScreen
     }
