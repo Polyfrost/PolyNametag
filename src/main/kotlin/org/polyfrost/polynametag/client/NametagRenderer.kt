@@ -40,7 +40,7 @@ object NametagRenderer {
     private const val HEAD_SEARCH_RADIUS = 0.75
     private const val HEAD_SEARCH_TOP = 1.25
 
-    private const val SEE_THROUGH_TEXT_ALPHA = 0x40
+    private const val SEE_THROUGH_TEXT_ALPHA = 0x80
 
     const val BACKGROUND_DEPTH = 0.01F
 
@@ -188,19 +188,16 @@ object NametagRenderer {
         val color = PolyNametagConfig.textColor.argb
         val originalAlpha = original ushr 24
         return if (originalAlpha in 1..254) {
-            color.withAlpha((color ushr 24).coerceAtMost(originalAlpha))
+            // Older versions draw see-through text too faintly to read without the background behind it
+            val maxAlpha = if (PolyNametagConfig.background) {
+                originalAlpha
+            } else {
+                originalAlpha.coerceAtLeast(SEE_THROUGH_TEXT_ALPHA)
+            }
+            color.withAlpha((color ushr 24).coerceAtMost(maxAlpha))
         } else {
             color
         }
-    }
-
-    @JvmStatic
-    fun seeThroughTextColor(original: Int): Int {
-        if (!PolyNametagConfig.isEnabled || PolyNametagConfig.background) {
-            return textColor(original)
-        }
-        val color = PolyNametagConfig.textColor.argb
-        return color.withAlpha((color ushr 24).coerceAtMost(SEE_THROUGH_TEXT_ALPHA))
     }
 
     //? if > 1.8.9 {
