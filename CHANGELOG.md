@@ -1,3 +1,6 @@
+## 1.2.7
+- Hide player nametags in the inventory when nametags are disabled
+
 ## 1.2.6
 - Updated to OneConfig 1.8.0
 
