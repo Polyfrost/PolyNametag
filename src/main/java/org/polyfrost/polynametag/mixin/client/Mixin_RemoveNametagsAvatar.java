@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
+import org.polyfrost.polynametag.client.NametagRenderer;
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,6 +29,7 @@ public abstract class Mixin_RemoveNametagsAvatar {
     private boolean polynametag$shouldRenderNametag() {
         if (!PolyNametagConfig.isEnabled()) return true;
         if (PolyNametagConfig.isRemoveNametags()) return false;
+        if (!PolyNametagConfig.isShowInInventory() && NametagRenderer.isInventoryScreenOpen()) return false;
         if (!Minecraft.renderNames()) return !PolyNametagConfig.isHidePlayerNametagsInHiddenHud();
         return true;
     }
