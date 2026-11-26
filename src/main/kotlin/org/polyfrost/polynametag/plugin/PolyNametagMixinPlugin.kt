@@ -14,7 +14,6 @@ class PolyNametagMixinPlugin : IMixinConfigPlugin {
         //? if = 26.2 {
         /*add("client.Mixin_RenderBackgroundShape262")
         add("client.Mixin_WrapNametagRender262")
-        add("client.Mixin_DeferNametagPhases262")
         add("client.Mixin_NametagPass262")
         add("client.PreparedFrameAccessor262")
         *///?}

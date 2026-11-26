@@ -19,7 +19,7 @@ public interface PreparedFrameAccessor262 {
     SubmitNodeStorage polynametag$getSubmitNodeStorage();
 
     @Accessor("groupsByPhase")
-    Map<FeatureRenderPhase<?>, ?> polynametag$getGroupsByPhase();
+    Map<FeatureRenderPhase<?>, Object> polynametag$getGroupsByPhase();
 
     @Invoker("executePhase")
     void polynametag$executePhase(FeatureRenderPhase<?> phase, FeatureFrameContext context);
