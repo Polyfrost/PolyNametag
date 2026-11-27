@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.network.chat.Component;
 //~ if < 26.1 'Matrix4fc' -> 'Matrix4f'
 import org.joml.Matrix4fc;
+import org.polyfrost.polynametag.client.NametagDeferral;
 import org.polyfrost.polynametag.client.NametagRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,8 +52,9 @@ public abstract class Mixin_RenderBackgroundShape {
         //~ if < 1.21.8 'Void' -> 'Integer'
         Operation<Void> original
     ) {
+        boolean seeThrough = displayMode == Font.DisplayMode.SEE_THROUGH;
+        bufferSource = NametagDeferral.redirect(bufferSource, seeThrough);
         if (NametagRenderer.useCustomBackground() && (backgroundColor >>> 24) != 0) {
-            boolean seeThrough = displayMode == Font.DisplayMode.SEE_THROUGH;
             RenderType type;
             //~ if < 1.21.11 'RenderTypes' -> 'RenderType'
             type = seeThrough ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground();
