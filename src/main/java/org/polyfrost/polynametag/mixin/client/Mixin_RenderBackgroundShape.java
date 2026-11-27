@@ -1,77 +1,124 @@
 package org.polyfrost.polynametag.mixin.client;
 
-//? if > 1.8.9 && < 26.2 {
-/*import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
-//~ if < 1.21.11 'rendertype.RenderType' -> 'RenderType'
-import net.minecraft.client.renderer.rendertype.RenderType;
-//? if >= 1.21.11
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.network.chat.Component;
-//~ if < 26.1 'Matrix4fc' -> 'Matrix4f'
-import org.joml.Matrix4fc;
+//? if >= 26.3 {
+import net.minecraft.client.gui.font.TextRenderable;
+import net.minecraft.client.renderer.feature.FeatureFrameContext;
+import net.minecraft.client.renderer.feature.RenderTypeFeatureRenderer;
+import net.minecraft.client.renderer.feature.TextFeatureRenderer;
+import org.polyfrost.polynametag.api.NametagStyle;
 import org.polyfrost.polynametag.client.NametagRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//~ if < 1.21.10 'feature.NameTagFeatureRenderer' -> 'entity.EntityRenderer'
-@Mixin(targets = "net.minecraft.client.renderer.feature.NameTagFeatureRenderer")
-public abstract class Mixin_RenderBackgroundShape {
-    @WrapOperation(
-        //? if >= 26.1 {
-        method = "renderTranslucent",
-        //?} elif >= 1.21.10 {
-        /^method = "render",
-        ^///?} else
-        //method = "renderNameTag",
-        at = @At(
-            value = "INVOKE",
-			//~ if < 26.1 'Matrix4fc' -> 'Matrix4f'
-			//~ if < 1.21.8 ')V' -> ')I'
-            target = "Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/network/chat/Component;FFIZLorg/joml/Matrix4fc;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)V"
-        )
-    )
-    //~ if < 1.21.8 'void' -> 'int'
+import java.util.List;
+
+@Mixin(targets = "net.minecraft.client.renderer.feature.TextFeatureRenderer")
+public abstract class Mixin_RenderBackgroundShape
+    extends RenderTypeFeatureRenderer<TextFeatureRenderer.Submit> {
+
+    // draws the shape before glyphs are built and extends the feature renderer superclass so inherited getVertexBuilder is callable.
+    // TextFeatureRenderer is shared with signs, text displays and map labels, so only text marked by the nametag submit path is restyled.
+    @Inject(method = "buildGroup", at = @At("HEAD"))
     private void polynametag$drawShapedBackground(
-        Font font,
-        Component text,
-        float x,
-        float y,
-        int color,
-        boolean shadow,
-		//~ if < 26.1 'Matrix4fc' -> 'Matrix4f'
-        Matrix4fc matrix,
-        MultiBufferSource bufferSource,
-        Font.DisplayMode displayMode,
-        int backgroundColor,
-        int packedLightCoords,
-        //~ if < 1.21.8 'Void' -> 'Integer'
-        Operation<Void> original
+        FeatureFrameContext context,
+        List<TextFeatureRenderer.Submit> submits,
+        CallbackInfo ci
     ) {
-        if (NametagRenderer.useCustomBackground() && (backgroundColor >>> 24) != 0) {
-            boolean seeThrough = displayMode == Font.DisplayMode.SEE_THROUGH;
-            RenderType type;
-            //~ if < 1.21.11 'RenderTypes' -> 'RenderType'
-            type = seeThrough ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground();
-            VertexConsumer consumer = bufferSource.getBuffer(type);
-
-            int argb = NametagRenderer.backgroundArgb();
-            float[] vertices = NametagRenderer.backgroundQuadBuffer();
-            int count = NametagRenderer.backgroundQuads(x, y, -2.0F * x);
-            for (int i = 0; i < count; i += 2) {
-                consumer.addVertex(matrix, vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
-                    .setColor(argb)
-                    .setLight(packedLightCoords);
+        for (TextFeatureRenderer.Submit submit : submits) {
+            if (!(submit.content() instanceof TextFeatureRenderer.Content.Text text)) {
+                continue;
+            }
+            NametagStyle style = NametagRenderer.nametagStyle(text.string());
+            if (style == null || !style.getOwnBackground()) {
+                continue;
             }
 
-            backgroundColor = 0;
+            int argb = style.getBackgroundColor();
+            float[] rects = NametagRenderer.backgroundRectBuffer();
+            int count = NametagRenderer.backgroundRects(style);
+            for (int i = 0; i < count; i += 4) {
+                TextRenderable background = context.font().prepareBackground(
+                    rects[i],
+                    rects[i + 1],
+                    rects[i + 2],
+                    rects[i + 3],
+                    argb
+                );
+                background.render(
+                    submit.pose(),
+                    getVertexBuilder(background.renderType(submit.displayMode())),
+                    submit.lightCoords(),
+                    false
+                );
+            }
         }
+    }
+}
+//?} elif = 26.2 {
+/*import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.feature.FeatureFrameContext;
+import net.minecraft.client.renderer.feature.NameTagFeatureRenderer;
+import net.minecraft.client.renderer.feature.RenderTypeFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import org.polyfrost.polynametag.api.NametagStyle;
+import org.polyfrost.polynametag.client.BackgroundYieldHolder;
+import org.polyfrost.polynametag.client.NametagRenderer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-        //~ if < 1.21.8 'original.call(' -> 'return original.call('
-        original.call(font, text, x, y, color, shadow, matrix, bufferSource, displayMode, backgroundColor, packedLightCoords);
+import java.util.List;
+
+@Mixin(targets = "net.minecraft.client.renderer.feature.NameTagFeatureRenderer")
+public abstract class Mixin_RenderBackgroundShape
+    extends RenderTypeFeatureRenderer<NameTagFeatureRenderer.Submit> {
+
+    // draws the shape before glyphs are built and extends the feature renderer superclass so inherited getVertexBuilder is callable
+    @Inject(method = "buildGroup", at = @At("HEAD"))
+    private void polynametag$drawShapedBackground(
+        FeatureFrameContext context,
+        List<NameTagFeatureRenderer.Submit> submits,
+        CallbackInfo ci
+    ) {
+        float[] vertices = NametagRenderer.backgroundQuadBuffer();
+        VertexConsumer consumer = null;
+        Font.DisplayMode consumerMode = null;
+        for (NameTagFeatureRenderer.Submit submit : submits) {
+            if (((BackgroundYieldHolder) (Object) submit).polynametag$backgroundYielded()) {
+                continue;
+            }
+            boolean seeThrough = submit.displayMode() == Font.DisplayMode.SEE_THROUGH;
+            NametagStyle style = NametagRenderer.resolve(
+                submit.color(),
+                false,
+                submit.backgroundColor(),
+                seeThrough,
+                submit.x(),
+                submit.y(),
+                -2.0F * submit.x()
+            );
+            if (!style.getOwnBackground()) {
+                continue;
+            }
+
+            if (consumer == null || submit.displayMode() != consumerMode) {
+                consumerMode = submit.displayMode();
+                RenderType type = seeThrough ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground();
+                consumer = getVertexBuilder(type);
+            }
+            int argb = style.getBackgroundColor();
+            int count = NametagRenderer.backgroundQuads(style);
+            for (int i = 0; i < count; i += 2) {
+                consumer.addVertex(submit.pose(), vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
+                    .setColor(argb)
+                    .setLight(submit.lightCoords());
+            }
+        }
     }
 }
 *///?} elif = 1.8.9 {
@@ -82,6 +129,7 @@ import net.minecraft.client.render.TextRenderer;
 import net.minecraft.client.render.vertex.BufferBuilder;
 import net.minecraft.client.render.vertex.DefaultVertexFormat;
 import net.minecraft.client.render.vertex.Tesselator;
+import org.polyfrost.polynametag.api.NametagStyle;
 import org.polyfrost.polynametag.client.NametagRenderer;
 import org.polyfrost.polynametag.client.PolyNametagConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -105,20 +153,25 @@ public abstract class Mixin_RenderBackgroundShape {
         Operation<Void> original,
         @Local(argsOnly = true) String name
     ) {
-        if (PolyNametagConfig.isEnabled()) {
+        if (PolyNametagConfig.isEnabled() && !NametagRenderer.getBackgroundYielded()) {
             BufferBuilder buffer = tesselator.getBuffer();
             buffer.end();
             buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
 
-            int argb = NametagRenderer.backgroundColor(0x40000000);
-            if ((argb >>> 24) != 0) {
-                int width = getTextRenderer().getWidth(name);
+            int width = getTextRenderer().getWidth(name);
+            NametagStyle style = NametagRenderer.resolve(
+                NametagRenderer.LEGACY_SEE_THROUGH_TEXT,
+                false,
+                NametagRenderer.LEGACY_BACKGROUND,
+                true,
+                -width / 2,
+                name.equals("deadmau5") ? -10 : 0,
+                width
+            );
+            if (style.getOwnBackground()) {
+                int argb = style.getBackgroundColor();
                 float[] vertices = NametagRenderer.backgroundQuadBuffer();
-                int count = NametagRenderer.backgroundQuads(
-                    -width / 2,
-                    NametagRenderer.translateY(name.equals("deadmau5") ? -10 : 0),
-                    width
-                );
+                int count = NametagRenderer.backgroundQuads(style);
                 for (int i = 0; i < count; i += 2) {
                     buffer.vertex(vertices[i], vertices[i + 1], NametagRenderer.BACKGROUND_DEPTH)
                         .color(argb >> 16 & 255, argb >> 8 & 255, argb & 255, argb >>> 24)
@@ -131,6 +184,6 @@ public abstract class Mixin_RenderBackgroundShape {
     }
 }
 *///?} else {
-public abstract class Mixin_RenderBackgroundShape {
+/*public abstract class Mixin_RenderBackgroundShape {
 }
-//?}
+*///?}
