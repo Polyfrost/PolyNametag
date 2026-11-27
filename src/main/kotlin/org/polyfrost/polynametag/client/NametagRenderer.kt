@@ -24,11 +24,13 @@ import net.minecraft.world.phys.AABB
 import net.minecraft.entity.living.ArmorStandEntity as ArmorStand
 import net.minecraft.util.math.Box as AABB
 *///?}
+import org.polyfrost.polynametag.api.NametagStyle
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
 object NametagRenderer {
+    private const val FRONT_PERSPECTIVE = 2
     private const val CORNER_SEGMENTS = 8
 
     private const val ARC_POINTS = CORNER_SEGMENTS + 1
@@ -42,7 +44,21 @@ object NametagRenderer {
 
     private const val SEE_THROUGH_TEXT_ALPHA = 0x80
 
+    private const val VISIBLE_TEXT_ALPHA = 26
+
+    //? if >= 1.21.8 {
+    private const val OPAQUE_TEXT_ALPHA_BELOW = 0
+    //?} else
+    //private const val OPAQUE_TEXT_ALPHA_BELOW = 4
+
     const val BACKGROUND_DEPTH = 0.01F
+
+    const val LEGACY_BACKGROUND = 0x40000000
+
+    const val LEGACY_SEE_THROUGH_TEXT = 0x20FFFFFF
+
+    @JvmStatic
+    var backgroundYielded: Boolean = false
 
     private val ARC_COS = FloatArray(PERIMETER_POINTS)
     private val ARC_SIN = FloatArray(PERIMETER_POINTS)
@@ -84,8 +100,7 @@ object NametagRenderer {
         0.0F
     }
 
-    @JvmStatic
-    fun useCustomBackground(): Boolean {
+    private fun useCustomBackground(): Boolean {
         if (!PolyNametagConfig.isEnabled || !PolyNametagConfig.background) {
             return false
         }
@@ -93,19 +108,93 @@ object NametagRenderer {
     }
 
     @JvmStatic
-    fun backgroundArgb(): Int = PolyNametagConfig.backgroundColor.argb
+    fun resolve(
+        color: Int,
+        shadow: Boolean,
+        vanillaBackground: Int,
+        seeThrough: Boolean,
+        x: Float,
+        y: Float,
+        width: Float,
+    ): NametagStyle {
+        val textY = translateY(y)
+        val background = backgroundColor(vanillaBackground)
+        //? if = 1.8.9 {
+        /*val ownBackground = PolyNametagConfig.isEnabled && (background ushr 24) != 0
+        val drawnBackground = background
+        *///?} else {
+        val ownBackground = useCustomBackground() && (background ushr 24) != 0
+        val drawnBackground = if (ownBackground) PolyNametagConfig.backgroundColor.argb else background
+        //?}
+        //? if >= 26.3 {
+        val drawnShadow = if (seeThrough) shadow else textShadow(shadow)
+        //?} else
+        //val drawnShadow = textShadow(shadow)
+
+        val paddingX = if (ownBackground) PolyNametagConfig.paddingX else 0.0F
+        val paddingY = if (ownBackground) PolyNametagConfig.paddingY else 0.0F
+        val left = x - 1.0F - paddingX
+        val top = textY - 1.0F - paddingY
+        //? if = 1.8.9 {
+        /*val right = if (ownBackground) x + width + paddingX else 1.0F - x
+        val bottom = if (ownBackground) textY + 9.0F + paddingY else textY + 8.0F
+        *///?} else {
+        val right = x + width + paddingX
+        val bottom = textY + 9.0F + paddingY
+        //?}
+
+        return NametagStyle(
+            textColor = textColor(color),
+            textShadow = drawnShadow,
+            textY = textY,
+            backgroundColor = drawnBackground,
+            ownBackground = ownBackground,
+            backgroundLeft = left,
+            backgroundTop = top,
+            backgroundRight = right,
+            backgroundBottom = bottom,
+            cornerRadius = if (ownBackground) backgroundRadius(left, right, top, bottom) else 0.0F,
+        )
+    }
+
+    @JvmStatic
+    fun vanillaBackgroundColor(style: NametagStyle): Int = if (style.ownBackground) 0 else style.backgroundColor
+
+    @JvmStatic
+    fun showsOwnNametag(): Boolean = PolyNametagConfig.isEnabled && PolyNametagConfig.isShowOwnNametag
+
+    @JvmStatic
+    fun lowersSneakingNametag(entity: Entity): Boolean =
+        //? if = 1.8.9 {
+        /*PolyNametagConfig.isEnabled && entity.isSneaking
+        *///?} else
+        false
+
+    @JvmStatic
+    fun cameraPitch(pitch: Float): Float {
+        //? if = 1.8.9 {
+        /*val dispatcher = Minecraft.getInstance().entityRenderDispatcher
+        if (!PolyNametagConfig.isEnabled || dispatcher.options?.perspective != FRONT_PERSPECTIVE) return pitch
+        val cached = dispatcher.cameraPitch
+        if (pitch != cached && pitch != -cached) return pitch
+        val actual = dispatcher.camera?.pitch ?: 0f
+        if (pitch == 0f || actual == 0f) return if (pitch == cached) -pitch else pitch
+        return if ((pitch > 0f) == (actual > 0f)) -pitch else pitch
+        *///?} else
+        return pitch
+    }
 
     @JvmStatic
     fun backgroundQuadBuffer(): FloatArray = quadScratch
 
     @JvmStatic
-    fun backgroundQuads(x: Float, y: Float, width: Float): Int {
-        val x0 = x - 1.0F - PolyNametagConfig.paddingX
-        val x1 = x + width + PolyNametagConfig.paddingX
-        val y0 = y - 1.0F - PolyNametagConfig.paddingY
-        val y1 = y + 9.0F + PolyNametagConfig.paddingY
+    fun backgroundQuads(style: NametagStyle): Int {
+        val x0 = style.backgroundLeft
+        val x1 = style.backgroundRight
+        val y0 = style.backgroundTop
+        val y1 = style.backgroundBottom
 
-        val radius = backgroundRadius(x0, x1, y0, y1)
+        val radius = style.cornerRadius
 
         val out = quadScratch
 
@@ -153,13 +242,13 @@ object NametagRenderer {
     // 26.3 builds text backgrounds from Font.prepareBackground, which only produces axis-aligned
     // rects, so rounded corners are approximated by horizontal bands. Writes x0/y0/x1/y1 per rect.
     @JvmStatic
-    fun backgroundRects(x: Float, y: Float, width: Float): Int {
-        val x0 = x - 1.0F - PolyNametagConfig.paddingX
-        val x1 = x + width + PolyNametagConfig.paddingX
-        val y0 = y - 1.0F - PolyNametagConfig.paddingY
-        val y1 = y + 9.0F + PolyNametagConfig.paddingY
+    fun backgroundRects(style: NametagStyle): Int {
+        val x0 = style.backgroundLeft
+        val x1 = style.backgroundRight
+        val y0 = style.backgroundTop
+        val y1 = style.backgroundBottom
 
-        val radius = backgroundRadius(x0, x1, y0, y1)
+        val radius = style.cornerRadius
         val out = rectScratch
 
         if (radius <= 0.0F) {
@@ -179,14 +268,16 @@ object NametagRenderer {
         return o
     }
 
-    @JvmStatic
-    fun textColor(original: Int): Int {
+    private fun textColor(original: Int): Int {
         if (!PolyNametagConfig.isEnabled) {
             return original
         }
 
         val color = PolyNametagConfig.textColor.argb
         val originalAlpha = original ushr 24
+        if (originalAlpha in OPAQUE_TEXT_ALPHA_BELOW until VISIBLE_TEXT_ALPHA) {
+            return color.withAlpha(originalAlpha)
+        }
         return if (originalAlpha in 1..254) {
             // Older versions draw see-through text too faintly to read without the background behind it
             val maxAlpha = if (PolyNametagConfig.background) {
@@ -213,15 +304,18 @@ object NametagRenderer {
     //? if >= 26.3 {
     // 26.3 renders nametags through TextFeatureRenderer, which is shared with signs, text displays and map
     // labels, so nametag text is wrapped on submission to stay identifiable once it reaches the renderer
-    private class NametagText(private val delegate: FormattedCharSequence) : FormattedCharSequence {
+    private class NametagText(
+        private val delegate: FormattedCharSequence,
+        val style: NametagStyle,
+    ) : FormattedCharSequence {
         override fun accept(sink: FormattedCharSink): Boolean = delegate.accept(sink)
     }
 
     @JvmStatic
-    fun markNametagText(text: FormattedCharSequence): FormattedCharSequence = NametagText(text)
+    fun markNametagText(text: FormattedCharSequence, style: NametagStyle): FormattedCharSequence = NametagText(text, style)
 
     @JvmStatic
-    fun isNametagText(text: FormattedCharSequence): Boolean = text is NametagText
+    fun nametagStyle(text: FormattedCharSequence): NametagStyle? = (text as? NametagText)?.style
     //?}
 
     //? if > 1.8.9 {
@@ -235,8 +329,7 @@ object NametagRenderer {
     }
     //?}
 
-    @JvmStatic
-    fun backgroundColor(original: Int): Int {
+    private fun backgroundColor(original: Int): Int {
         if (!PolyNametagConfig.isEnabled) {
             return original
         }
@@ -254,8 +347,7 @@ object NametagRenderer {
         }
     }
 
-    @JvmStatic
-    fun translateY(original: Float): Float {
+    private fun translateY(original: Float): Float {
         if (!PolyNametagConfig.isEnabled) {
             return original
         }
@@ -263,8 +355,7 @@ object NametagRenderer {
         return original - PolyNametagConfig.heightOffset
     }
 
-    @JvmStatic
-    fun textShadow(original: Boolean): Boolean {
+    private fun textShadow(original: Boolean): Boolean {
         if (!PolyNametagConfig.isEnabled) {
             return original
         }
