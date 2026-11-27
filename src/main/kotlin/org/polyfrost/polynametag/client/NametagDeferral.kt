@@ -4,13 +4,19 @@ package org.polyfrost.polynametag.client
 /*import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
 import com.mojang.blaze3d.vertex.ByteBufferBuilder
+import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.MultiBufferSource
+//? if >= 1.21.11 {
+import net.minecraft.client.renderer.rendertype.RenderType
+//?} else
+/*import net.minecraft.client.renderer.RenderType*/
 
 object NametagDeferral {
     private const val BUFFER_SIZE = 1 shl 16
 
-    private var bufferSource: MultiBufferSource.BufferSource? = null
+    private val seeThroughSource by lazy { DeferredSource() }
+    private val normalSource by lazy { DeferredSource() }
     private var opaqueDepth: TextureTarget? = null
     private var savedDepth: TextureTarget? = null
     private var inLevel = false
@@ -34,13 +40,13 @@ object NametagDeferral {
     }
 
     @JvmStatic
-    fun redirect(original: MultiBufferSource): MultiBufferSource {
+    fun redirect(original: MultiBufferSource, seeThrough: Boolean): MultiBufferSource {
         if (!inLevel) {
             return original
         }
 
         pending = true
-        return bufferSource ?: MultiBufferSource.immediate(ByteBufferBuilder(BUFFER_SIZE)).also { bufferSource = it }
+        return if (seeThrough) seeThroughSource else normalSource
     }
 
     @JvmStatic
@@ -62,11 +68,10 @@ object NametagDeferral {
         }
 
         pending = false
-        val source = bufferSource ?: return
         val main = Minecraft.getInstance().mainRenderTarget
         val opaque = opaqueDepth
         if (!depthCaptured || opaque == null) {
-            source.endBatch()
+            endBatches()
             return
         }
 
@@ -75,9 +80,14 @@ object NametagDeferral {
         savedDepth = saved
         main.copyDepthFrom(opaque)
         bindMain(main)
-        source.endBatch()
+        endBatches()
         main.copyDepthFrom(saved)
         bindMain(main)
+    }
+
+    private fun endBatches() {
+        seeThroughSource.bufferSource.endBatch()
+        normalSource.bufferSource.endBatch()
     }
 
     private fun copyDepth(existing: TextureTarget?, main: RenderTarget, label: String): TextureTarget {
@@ -104,6 +114,17 @@ object NametagDeferral {
     private fun bindMain(main: RenderTarget) {
         //? if < 1.21.5
         //main.bindWrite(false)
+    }
+
+    private class DeferredSource : MultiBufferSource {
+        private val fixedBuffers = LinkedHashMap<RenderType, ByteBufferBuilder>()
+        val bufferSource: MultiBufferSource.BufferSource =
+            MultiBufferSource.immediateWithBuffers(fixedBuffers, ByteBufferBuilder(BUFFER_SIZE))
+
+        override fun getBuffer(type: RenderType): VertexConsumer {
+            fixedBuffers.computeIfAbsent(type) { ByteBufferBuilder(BUFFER_SIZE) }
+            return bufferSource.getBuffer(type)
+        }
     }
 }
 *///?} elif = 1.8.9 {
