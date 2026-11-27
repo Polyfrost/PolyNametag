@@ -22,6 +22,10 @@ class PolyNametagMixinPlugin : IMixinConfigPlugin {
         /*add("client.Mixin_RenderBackgroundShape")
         *///?}
 
+        //? if > 1.8.9 && < 26.2 {
+        /*add("client.Mixin_DeferNametags")
+        *///?}
+
         //? if >= 1.21.10 && < 26.2 {
         /*add("client.Mixin_WrapNametagRender12110")
         *///?}
@@ -33,6 +37,8 @@ class PolyNametagMixinPlugin : IMixinConfigPlugin {
         //? if = 1.8.9 {
         /*add("client.Mixin_FixSneakingNametag")
         add("client.Mixin_RespectCustomNameVisible")
+        add("client.Mixin_DeferNametags")
+        add("client.Mixin_DeferNametagRender")
         *///?}
     }
 
